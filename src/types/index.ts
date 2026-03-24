@@ -32,3 +32,9 @@ export interface IOrderResult {
     id: string;
     total: number;
 }
+
+export interface IEvents {
+    on<T extends object>(event: string, callback: (data: T) => void): void;
+    emit<T extends object>(event: string, data?: T): void;
+    trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void;
+}
