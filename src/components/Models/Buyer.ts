@@ -35,7 +35,7 @@ export class Buyer {
             phone: '',
             address: ''
         };
-        this.events.emit('buyer:changed', { data: this._data });
+        this.events.emit('Данные покупателя изменены', { data: this._data });
     }
 
     validate(): Partial<Record<keyof IBuyer, string>> {

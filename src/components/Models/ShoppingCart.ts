@@ -16,18 +16,18 @@ export class ShoppingCart {
     addItem(product: IProduct): void {
         if (!this.containsItem(product.id)) {
             this._items.push(product);
-            this.events.emit('cart:changed', { items: this._items });
+            this.events.emit('корзина изменена', { items: this._items });
         }
     }
 
     removeItem(productId: string): void {
         this._items = this._items.filter(item => item.id !== productId);
-        this.events.emit('cart:changed', { items: this._items });
+        this.events.emit('корзина изменена', { items: this._items });
     }
 
     clear(): void {
         this._items = [];
-        this.events.emit('cart:changed', { items: this._items });
+        this.events.emit('корзина изменена', { items: this._items });
     }
 
     getTotalPrice(): number {

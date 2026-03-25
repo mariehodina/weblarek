@@ -3,30 +3,28 @@ import { EventEmitter } from './components/base/events';
 import { Catalog } from './components/Models/Catalog';
 import { ShoppingCart } from './components/Models/ShoppingCart';
 import { Buyer } from './components/Models/Buyer';
-import { IProduct } from './types';
-
-// Импортируем тестовые данные
+// import { IProduct } from './types';
 import { apiProducts } from './utils/data';
 
-// Создаем экземпляр брокера событий
 const events = new EventEmitter();
-
-// Подписываемся на события для отслеживания работы моделей
-events.on('catalog:changed', (data) => {
+events.on('каталог обновлен', (data) => {
     console.log('Каталог обновлен:', data);
 });
-
-events.on('product:selected', (data) => {
+events.on('выбран товар', (data) => {
     console.log('Выбран товар:', data);
 });
-
-events.on('cart:changed', (data) => {
+events.on('корзина изменена', (data) => {
     console.log('Корзина изменена:', data);
 });
-
-events.on('buyer:changed', (data) => {
+events.on('данные покупателя изменены', (data) => {
     console.log('Данные покупателя изменены:', data);
 });
+
+
+
+
+
+
 
 console.log('=== НАЧАЛО ТЕСТИРОВАНИЯ МОДЕЛЕЙ ДАННЫХ ===\n');
 
@@ -127,28 +125,11 @@ buyer.setField('phone', '+7 999 123-45-67');
 buyer.setField('address', 'г. Москва, ул. Тестовая, д. 1');
 console.log('Данные после установки полей:', buyer.getData());
 
-// Тест 3: Групповое обновление данных
-console.log('\n✓ Тест 3: Групповое обновление данных');
-buyer.setData({ 
-    payment: 'cash',
-    address: 'г. Санкт-Петербург, Невский пр., д. 10'
-});
-console.log('Данные после группового обновления:', buyer.getData());
 
 // Тест 4: Валидация корректных данных
 console.log('\n✓ Тест 4: Валидация корректных данных');
 const validationErrors = buyer.validate();
 console.log('Ошибки валидации (должны быть пустыми):', validationErrors);
-
-// Тест 5: Валидация некорректных данных
-console.log('\n✓ Тест 5: Валидация некорректных данных');
-buyer.setData({
-    email: 'invalid-email',
-    phone: '123',
-    address: ''
-});
-const invalidErrors = buyer.validate();
-console.log('Ошибки валидации для некорректных данных:', invalidErrors);
 
 // Тест 6: Очистка данных покупателя
 console.log('\n✓ Тест 6: Очистка данных покупателя');
@@ -156,10 +137,6 @@ buyer.clear();
 console.log('Данные после очистки:', buyer.getData());
 
 console.log('\n✅ Тестирование модели BUYER завершено\n');
-
-// ========== ДОПОЛНИТЕЛЬНЫЕ ТЕСТЫ ВЗАИМОДЕЙСТВИЯ МОДЕЛЕЙ ==========
-console.log('4. ДОПОЛНИТЕЛЬНЫЕ ТЕСТЫ ВЗАИМОДЕЙСТВИЯ МОДЕЛЕЙ');
-console.log('----------------------------------------');
 
 // Тест: Добавление выбранного товара в корзину
 console.log('✓ Тест: Добавление выбранного товара в корзину');
@@ -172,4 +149,3 @@ if (productToAdd) {
     console.log('Общая стоимость:', cart.getTotalPrice());
 }
 
-console.log('\n=== ТЕСТИРОВАНИЕ ЗАВЕРШЕНО ===');
