@@ -32,6 +32,10 @@ export interface IOrderResult {
     id: string;
     total: number;
 }
+export interface IProductsResponse {
+    total: number;   
+    items: IProduct[]; 
+}
 
 export interface IEvents {
     on<T extends object>(event: string, callback: (data: T) => void): void;
