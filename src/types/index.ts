@@ -14,7 +14,7 @@ export interface IProduct {
     price: number | null;
 }
 
-export type TPayment = 'card' | 'cash';
+export type TPayment = 'card' | 'cash' | null;
 
 export interface IBuyer {
     payment: TPayment;

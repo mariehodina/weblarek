@@ -3,7 +3,7 @@ import { EventEmitter } from '../base/Events'
 
 export class Buyer {
     private _data: IBuyer = {
-        payment: 'card',
+        payment: null,
         email: '',
         phone: '',
         address: ''
@@ -27,7 +27,7 @@ export class Buyer {
     }
     clear(): void {
         this._data = {
-            payment: 'card',
+            payment: null,
             email: '',
             phone: '',
             address: ''
@@ -38,22 +38,16 @@ export class Buyer {
         const errors: Partial<Record<keyof IBuyer, string>> = {};
         // Валидация email
         if (!this._data.email) {
-            errors.email = 'Email обязателен для заполнения';
-        } else if (!/^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(this._data.email)) {
             errors.email = 'Введите корректный email адрес';
-        }
+        } 
         // Валидация телефона
         if (!this._data.phone) {
-            errors.phone = 'Телефон обязателен для заполнения';
-        } else if (!/^[\d\s\+\(\)\-]+$/.test(this._data.phone)) {
             errors.phone = 'Введите корректный номер телефона';
-        }
+        } 
         // Валидация адреса
         if (!this._data.address) {
-            errors.address = 'Адрес обязателен для заполнения';
-        } else if (this._data.address.length < 5) {
-            errors.address = 'Адрес должен содержать минимум 5 символов';
-        }
+            errors.address = 'Адрес некорректный';
+        } 
         // Валидация способа оплаты
         if (!this._data.payment) {
             errors.payment = 'Выберите способ оплаты';
