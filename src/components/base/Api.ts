@@ -1,9 +1,7 @@
-type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
-
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 export class Api {
     readonly baseUrl: string;
     protected options: RequestInit;
-
     constructor(baseUrl: string, options: RequestInit = {}) {
         this.baseUrl = baseUrl;
         this.options = {
@@ -13,25 +11,27 @@ export class Api {
             }
         };
     }
-
-    protected handleResponse<T>(response: Response): Promise<T> {
-        if (response.ok) return response.json();
-        else return response.json()
-            .then(data => Promise.reject(data.error ?? response.statusText));
+    protected async handleResponse<T>(response: Response): Promise<T> {
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const errorData = await response.json();
+            throw new Error(errorData.error || response.statusText);
+        }
     }
-
-    get<T extends object>(uri: string) {
-        return fetch(this.baseUrl + uri, {
+    async get<T extends object>(uri: string): Promise<T> {
+        const response = await fetch(this.baseUrl + uri, {
             ...this.options,
             method: 'GET'
-        }).then(this.handleResponse<T>);
+        });
+        return this.handleResponse<T>(response);
     }
-
-    post<T extends object>(uri: string, data: object, method: ApiPostMethods = 'POST') {
-        return fetch(this.baseUrl + uri, {
+    async post<T extends object>(uri: string, data: object, method: ApiPostMethods = 'POST'): Promise<T> {
+        const response = await fetch(this.baseUrl + uri, {
             ...this.options,
             method,
             body: JSON.stringify(data)
-        }).then(this.handleResponse<T>);
+        });
+        return this.handleResponse<T>(response);
     }
 }

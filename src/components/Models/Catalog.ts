@@ -1,34 +1,25 @@
-import { IProduct, IEvents } from '../../types';
-import { EventEmitter } from '../base/events';
+// src/components/Models/Catalog.ts
+
+import { IProduct } from '../../types';
 
 export class Catalog {
-    private _products: IProduct[] = [];
-    private _selectedProduct: IProduct | null = null;
-    private events: IEvents;
-
-    constructor(events: EventEmitter) {
-        this.events = events;
-    }
-
+    private products: IProduct[] = [];
+    private selectedProduct: IProduct | null = null;
     setProducts(products: IProduct[]): void {
-        this._products = products;
-        this.events.emit('каталог изменен', { products: this._products });
+        this.products = products;
+        console.log('Каталог обновлен, товаров:', this.products.length);
     }
-
     getProducts(): IProduct[] {
-        return this._products;
+        return this.products;
     }
-
     getProductById(id: string): IProduct | undefined {
-        return this._products.find(product => product.id === id);
+        return this.products.find(product => product.id === id);
     }
-
     setSelectedProduct(product: IProduct): void {
-        this._selectedProduct = product;
-        this.events.emit('Выбран товар', { product: this._selectedProduct });
+        this.selectedProduct = product;
+        console.log('Выбран товар:', product.title);
     }
-
     getSelectedProduct(): IProduct | null {
-        return this._selectedProduct;
+        return this.selectedProduct;
     }
 }
