@@ -1,6 +1,4 @@
-// src/components/ApiService.ts
-
-import { IApi, IProduct, IOrder, IOrderResult, IProductsResponse } from '../types';
+import { IApi, IProduct, IOrder, IOrderResult, IProductsResponse } from '../../types';
 export class ApiService {
     private api: IApi;
     constructor(api: IApi) {

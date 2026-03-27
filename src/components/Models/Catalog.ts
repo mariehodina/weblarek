@@ -1,7 +1,4 @@
-// src/components/Models/Catalog.ts
-
 import { IProduct } from '../../types';
-
 export class Catalog {
     private products: IProduct[] = [];
     private selectedProduct: IProduct | null = null;
