@@ -1,28 +1,19 @@
-import { IProduct } from '../../types';
-
+import { IProduct, IEvents } from '../../types';
+import { EventEmitter } from '../base/Events';
 export class ShoppingCart {
     private items: IProduct[] = [];
-    private events: any;
-
-    constructor(eventEmitter: any) {
-        this.events = eventEmitter;
+    private events: IEvents;
+    constructor(events: EventEmitter) {
+        this.events = events;
     }
+
     getItems(): IProduct[] {
         return this.items;
     }
-    addItem(product: IProduct): void {
-        let alreadyExists = false;
-        for (let i = 0; i < this.items.length; i++) {
-            if (this.items[i].id === product.id) {
-                alreadyExists = true;
-                break;
-            }
-        }
-        if (!alreadyExists) {
+    ddItem(product: IProduct): void {
+        if (!this.containsItem(product.id)) {
             this.items.push(product);
-            if (this.events && this.events.emit) {
-                this.events.emit('корзина изменена', this.items);
-            }
+            this.events.emit('корзина изменена', { items: this.items });
         }
     }
     removeItem(productId: string): void {
@@ -33,15 +24,11 @@ export class ShoppingCart {
             }
         }
         this.items = newItems;
-        if (this.events && this.events.emit) {
-            this.events.emit('корзина изменена', this.items);
-        }
+        this.events.emit('корзина изменена', { items: this.items });
     }
     clear(): void {
         this.items = [];
-        if (this.events && this.events.emit) {
-            this.events.emit('сорзина изменена', this.items);
-        }
+        this.events.emit('корзина изменена', { items: this.items });
     }
     getTotalPrice(): number {
         let total = 0;
@@ -52,7 +39,6 @@ export class ShoppingCart {
                 total = total + price;
             }
         }
-        
         return total;
     }
     getItemCount(): number {
