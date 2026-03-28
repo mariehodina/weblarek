@@ -21,7 +21,7 @@ export class ShoppingCart {
         if (!alreadyExists) {
             this.items.push(product);
             if (this.events && this.events.emit) {
-                this.events.emit('cart:changed', this.items);
+                this.events.emit('корзина изменена', this.items);
             }
         }
     }
@@ -34,13 +34,13 @@ export class ShoppingCart {
         }
         this.items = newItems;
         if (this.events && this.events.emit) {
-            this.events.emit('cart:changed', this.items);
+            this.events.emit('корзина изменена', this.items);
         }
     }
     clear(): void {
         this.items = [];
         if (this.events && this.events.emit) {
-            this.events.emit('cart:changed', this.items);
+            this.events.emit('сорзина изменена', this.items);
         }
     }
     getTotalPrice(): number {

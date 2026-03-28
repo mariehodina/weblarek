@@ -99,8 +99,8 @@ if (productToAdd) {
 }
 
 const api = new Api(API_URL);
-const API = new ApiService(api);
-API.getProducts()
+const apiService = new ApiService(api);
+apiService.getProducts()
 .then((products) => {
     console.log('данные получены', products);
 }
