@@ -6,11 +6,10 @@ export class ShoppingCart {
     constructor(events: EventEmitter) {
         this.events = events;
     }
-
     getItems(): IProduct[] {
         return this.items;
     }
-    ddItem(product: IProduct): void {
+    addItem(product: IProduct): void {
         if (!this.containsItem(product.id)) {
             this.items.push(product);
             this.events.emit('корзина изменена', { items: this.items });

@@ -3,28 +3,27 @@ import { EventEmitter } from './components/base/Events';
 import { Catalog } from './components/Models/Catalog';
 import { ShoppingCart } from './components/Models/ShoppingCart';
 import { Buyer } from './components/Models/Buyer';
-// import { IProduct } from './types';
 import { apiProducts } from './utils/data';
 import { ApiService } from './components/Models/ApiService';
 import { API_URL } from './utils/constants';
 import { Api } from './components/base/Api';
 const events = new EventEmitter();
-events.on('каталог обновлен', (data) => {
+events.on('Каталог обновлен', (data) => {
     console.log('Каталог обновлен:', data);
 });
-events.on('выбран товар', (data) => {
+events.on('Выбран товар', (data) => {
     console.log('Выбран товар:', data);
 });
-events.on('корзина изменена', (data) => {
+events.on('Ворзина изменена', (data) => {
     console.log('Корзина изменена:', data);
 });
-events.on('данные покупателя изменены', (data) => {
+events.on('Ванные покупателя изменены', (data) => {
     console.log('Данные покупателя изменены:', data);
 });
 
 
 console.log('начало тестирования модели данных');
-console.log('тестирование модели каталог');
+console.log('тестирование модели Catalog');
 const catalog = new Catalog();
 console.log('Установка продуктов в каталог');
 catalog.setProducts(apiProducts.items);
@@ -44,8 +43,10 @@ const productToSelect = apiProducts.items[1];
 catalog.setSelectedProduct(productToSelect);
 const selectedProduct = catalog.getSelectedProduct();
 console.log('Выбранный продукт:', selectedProduct);
-console.log('Тестирование модели CATALOG завершено\n');
-console.log('тестирование модели SHOPPING CART');
+console.log('Тестирование модели каталог завершено');
+
+
+console.log('тестирование модели ShoppingCart');
 const cart = new ShoppingCart(events);
 console.log('Добавление товаров в корзину');
 cart.addItem(apiProducts.items[0]);
@@ -79,7 +80,7 @@ console.log('Начальные данные покупателя:', buyer.getDa
 console.log('Установка отдельных полей');
 buyer.setField('email', 'test@example.com');
 buyer.setField('phone', '+375333215210');
-buyer.setField('address', 'г. Москва, ул. Тестовая, д. 1');
+buyer.setField('address', 'г. Москва, ул. Луч, д. 1');
 console.log('Данные после установки полей:', buyer.getData());
 console.log('Валидация корректных данных');
 const validationErrors = buyer.validate();
@@ -103,8 +104,7 @@ const apiService = new ApiService(api);
 apiService.getProducts()
 .then((products) => {
     console.log('данные получены', products);
-}
-)
+})
 .catch ((error) => {
     console.error('ошибка. данные не получены', error);
 })

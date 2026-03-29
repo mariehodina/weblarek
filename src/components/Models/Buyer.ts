@@ -1,4 +1,4 @@
-import { IBuyer, IEvents, TPayment } from '../../types';
+import { IBuyer, IEvents, TPayment, TValidationErrors } from '../../types';
 import { EventEmitter } from '../base/Events'
 
 export class Buyer {
@@ -34,8 +34,8 @@ export class Buyer {
         };
         this.events.emit('покупатель изменен', { data: this._data });
     }
-    validate(): Partial<Record<keyof IBuyer, string>> {
-        const errors: Partial<Record<keyof IBuyer, string>> = {};
+    validate(): TValidationErrors {
+        const errors: TValidationErrors = {};
 
         if (!this._data.email) {
             errors.email = 'Введите корректный email адрес';

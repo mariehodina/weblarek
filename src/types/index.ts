@@ -42,3 +42,5 @@ export interface IEvents {
     emit<T extends object>(event: string, data?: T): void;
     trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void;
 }
+
+export type TValidationErrors = Partial<Record<keyof IBuyer, string>>;
