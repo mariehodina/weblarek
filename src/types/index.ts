@@ -14,6 +14,44 @@ export interface IProduct {
     price: number | null;
 }
 
+export interface ICardCatalogData {
+    id: string;
+    title: string;
+    price: number | null;
+    image: string;
+    category: string;
+}
+
+export interface ICardBasketData {
+    id: string;
+    title: string;
+    price: number | null;
+    index: number;
+}
+
+export interface ICardPreviewData {
+    id: string;
+    title: string;
+    price: number | null;
+    image: string;
+    category: string;
+    description: string;
+}
+
+export interface IGalleryData {
+    catalog: HTMLElement[];
+}
+
+export interface IOrderFormData {
+    payment: 'card' | 'cash' | null;
+    address: string;
+}
+
+export interface IContactsFormData {
+    email: string;
+    phone: string;
+}
+
 export type TPayment = 'card' | 'cash' | null;
 
 export interface IBuyer {

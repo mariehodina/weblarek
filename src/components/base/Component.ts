@@ -6,6 +6,11 @@ export abstract class Component<T> {
         // Учитывайте что код в конструкторе исполняется ДО всех объявлений в дочернем классе
     }
 
+      protected setText(element: HTMLElement, value: unknown): void {
+        if (element) {
+            element.textContent = String(value);
+        }
+    }
     // Инструментарий для работы с DOM в дочерних компонентах
 
     // Установить изображение с альтернативным текстом
@@ -16,6 +21,10 @@ export abstract class Component<T> {
                 element.alt = alt;
             }
         }
+    }
+
+    protected toggleClass(element: HTMLElement, className: string, force?: boolean): void {
+        element.classList.toggle(className, force);
     }
 
     // Вернуть корневой DOM-элемент
