@@ -1,4 +1,4 @@
-import { Component } from './Component';
+import { Component } from '../base/Component';
 import { EventEmitter } from '../base/Events';
 
 export abstract class Form<T> extends Component<T> {
@@ -14,7 +14,7 @@ export abstract class Form<T> extends Component<T> {
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         
-        this.submitButton = container.querySelector('.form__submit') as HTMLButtonElement;
+        this.submitButton = container.querySelector('button') as HTMLButtonElement;
         
         this.formElement.addEventListener('input', (e: Event) => {
             const target = e.target as HTMLInputElement;
