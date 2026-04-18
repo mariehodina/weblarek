@@ -239,9 +239,10 @@ events: EventEmitter - брокер событий.
 
 методы: 
 `set catalog(items: HTMLElement[])` - сеттер, который создает список карточек в каталоге. так же добавляет новые и используется при загрузке товара или товаров или обновлении каталога.
+`render(data?: GalleryData): HTMLElement` - возвращает корневой элемент галереи.
 
 
-#### CardCatalogData!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+#### CardCatalogData
 интерфейс данных дл карточки товара в каталоге.
 
 поля: 
@@ -252,21 +253,26 @@ events: EventEmitter - брокер событий.
 `category: string` - категория товара (например, «софт-скил», «другое»).
 
 
-#### CardCatalog !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#### CardCatalog 
 компонент карточек товара, показывает их в каталоге, так же изображение, категорую, название, цену товара. при нажатии на карточку генерирует событие для предоставления подтобной информации о товаре.
 
 конструктор: 
 `constructor(container: HTMLElement, events: EventEmitter)` - принимает родительский элемент карточки и экземпляр брокера событий для генерации уведомлений о нажатии. 
 
 поля класса:
-`imageElement: HTMLImageElement` - элемент изображения самого товара.
-`categoryElement: HTMLElement` - элемент для отображения категории товара.
+`imageElement: HTMLImageElement` - элемент изображения товара
+`categoryElement: HTMLElement` - элемент для отображения категории товара
+`titleElement: HTMLElement` - элемент для отображения названия
+`priceElement: HTMLElement`- элемент для отображения цены
+`_id: string` - приватное поле для хранения ID товара
 
 методы:
 `render(data: CardCatalogData): HTMLElement` - внедряет все данные о товаре в карточку (название, цену, изображение и категорию). 
+`get id(): string`- геттер для получения ID товара
+`set id(value: string)` - сеттер для установки ID товара
 
 
-#### CardBasketData !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#### CardBasketData 
 интерфейс данных для карточки товара в карзине.
 
 поля: 
@@ -283,14 +289,19 @@ events: EventEmitter - брокер событий.
 `constructor(container: HTMLElement, events: EventEmitter)` - принимает родительский элемент карточки и экземпляр брокера событий для генерации уведомлений об удалении карточки.
 
 поля класса: 
-`indexElement: HTMLElement` - элемент для отображения порядкового номера.
+`indexElement: HTMLElement` - элемент для отображения порядкового номера
 `deleteButton: HTMLButtonElement` - кнопка удаления товара из корзины.
+`priceElement: HTMLElement` - элемент для отображения цены
+`deleteButton: HTMLButtonElement` - кнопка удаления товара из корзины
+`_id: string` - приватное поле для хранения ID товара
 
 метлды:
 `render(data: CardBasketData): HTMLElement` - заполняет карточку данными товара.
+`get id(): string` - геттер для получения ID товара
+`set id(value: string)` - сеттер для установки ID товара
 
 
-#### CardPreviewData !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#### CardPreviewData 
 интерфейс данных для карточки предпросмотра товара в модальном онке.
 
 `id: string` - уникальный идентификатор товара.
@@ -310,13 +321,16 @@ events: EventEmitter - брокер событий.
 `imageElement: HTMLImageElement` - элемент изображения товара.
 `categoryElement: HTMLElement` - элемент для отображения категории.
 `descriptionElement: HTMLElement` - элемент для отображения описания.
-`buttonElement: HTMLButtonElement` - кнопка добавления в корзину.
+`priceElement: HTMLElement` - элемент для отображения цены
+`buttonElement: HTMLButtonElement` - кнопка добавления в корзину
+`_id: string` - приватное поле для хранения ID товара
+`_inBasket: boolean` - показывает, находится ли товар в корзине
 
 методы
 `render(data: CardPreviewData): HTMLElement` - заполняет карточку данными товара; генерирует событие card:add-to-basket с id товара при клике на кнопку добавления. Кнопка блокируется, если товар уже в корзине. Возвращает корневой элемент.
 
 
-#### OrderFormData !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#### OrderFormData 
 интерфейс данных для формы оформления заказа, в которую входит выбор способа оплаты, а так же вписание адреса.
 
 поля: 
@@ -324,7 +338,7 @@ events: EventEmitter - брокер событий.
 `address: string` - адрес доставки.
 
 
-#### OrderForm!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#### OrderForm
 компонент формы оформления заказа, что наследуется от Form и отвечает за выбор способа оплаты и введения адреса.
 
 конструктор
@@ -333,12 +347,16 @@ events: EventEmitter - брокер событий.
 поля класса
 `paymentButtons: HTMLButtonElement[]` - кнопки выбора способа оплаты.
 `addressInput: HTMLInputElement` - поле ввода адреса.
+`_payment: 'card' | 'cash' | null` - выбранный способ оплаты
+`_address: string` - введенный адрес
 
 методы
 `render(data: OrderFormData): HTMLElement` - обновляет отображение формы, генерирует событие order:change при изменении любого поля. Возвращает корневой элемент.
+`reset(): void `- сбрасывает форму до начального состояния
+`getFormData(): OrderFormData` - возвращает текущие данные формы
 
 
-#### ContactsFormData !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#### ContactsFormData 
 Интерфейс данных для формы контактных данных.
 
 поля
@@ -355,12 +373,15 @@ events: EventEmitter - брокер событий.
 поля класса
 `emailInput: HTMLInputElement` - поле ввода email.
 `phoneInput: HTMLInputElement` - поле ввода телефона.
+`_email: string` - введенный email
+`_phone: string` - введенный телефон
 
 методы
 `render(data: ContactsFormData): HTMLElement` - обновляет отображение формы, генерирует событие contacts:change при изменении любого поля, а так же возвращает корневой элемент.
+`reset(): void `- сбрасывает форму до начального состояния
+`getFormData(): ContactsFormData` - возвращает текущие данные формы
 
-
-#### Modal
+#### ContactsForm
 Класс модального окна, Не имеющий дочерних классов. он управляет отображением модального окна и его содержимог, где вся разметка, отображаемая внутри, — это самостоятельные компоненты, которые передаются извне.
 
 конструктор
