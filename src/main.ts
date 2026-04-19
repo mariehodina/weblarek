@@ -1,71 +1,78 @@
+import './scss/styles.scss';
 import { EventEmitter } from './components/base/Events';
 import { Catalog } from './components/Models/Catalog';
 import { ShoppingCart } from './components/Models/ShoppingCart';
 import { Buyer } from './components/Models/Buyer';
 import { apiProducts } from './utils/data';
 import { API_URL } from './utils/constants';
-import { Api } from './components/base/Api';
-import { LarekApi } from './components/LarekApi';
-import { CardCatalog } from './components/view/CardCatalog';
-import { Gallery } from './components/Models/Gallery';
+import { LarekApi } from "./components/View/larekApi";
+import { CardCatalog } from './components/View/CardCatalog';
+import { Gallery } from './components/View/Gallery';
 import { cloneTemplate } from './utils/utils';
 
-
-
+// Инициализация
 const events = new EventEmitter();
-const catalogModel = new Catalog();
+const catalogModel = new Catalog(events);
 const cartModel = new ShoppingCart(events);
 const buyerModel = new Buyer(events);
-const api = new Api(API_URL);
 const larekApi = new LarekApi(API_URL);
+
+// DOM элементы
 const galleryContainer = document.querySelector('.gallery') as HTMLElement;
 const gallery = new Gallery(galleryContainer);
 const cardCatalogTemplate = document.querySelector('#card-catalog') as HTMLTemplateElement;
 
+// Создание карточки
+const createCard = (item: any): HTMLElement => {
+    const card = new CardCatalog(cloneTemplate(cardCatalogTemplate), events);
+    card.id = item.id;
+    card.title = item.title;
+    card.price = item.price;
+    card.category = item.category;
+    card.image = item.image;
+    return card.render(item);
+};
 
+const renderCatalog = (): void => {
+    const products = catalogModel.getProducts();
+    const cards = products.map(createCard);
+    gallery.catalog = cards;
+    console.log('Каталог обновлен:', cards.length, 'карточек');
+};
+events.on('catalog:changed', renderCatalog);
 
-
-
-events.on('Каталог обновлен', (data) => {
-    console.log('Каталог обновлен:', data);
-});
-events.on('Выбран товар', (data) => {
-    console.log('Выбран товар:', data);
-});
-events.on('Корзина изменена', (data) => {
-    console.log('Корзина изменена:', data);
-    console.log('Товаров в корзине:', cartModel.getItemCount());
-    console.log('Общая стоимость:', cartModel.getTotalPrice());
-});
-events.on('Ванные покупателя изменены', (data) => {
-    console.log('Данные покупателя изменены:', data);
-});
-events.on('товар: выбран', (data) => {
-    console.log('Выбран товар:', data);
+events.on('card:select', (data: { id: string }) => {
+    console.log('Выбран товар:', data.id);
     const product = catalogModel.getProductById(data.id);
     if (product) {
         catalogModel.setSelectedProduct(product);
-        console.log('Детали товара:', product.title, product.description);
+        console.log('Детали:', product.title);
     }
 });
+
+events.on('cart:changed', () => {
+    console.log('Корзина:', cartModel.getItemCount(), 'товаров на сумму', cartModel.getTotalPrice());
+});
+
 events.on('buyer:changed', (data) => {
-    console.log('Данные покупателя изменены:', data);
+    console.log('Покупатель:', data);
 });
-events.on('catalog:changed', () => {
-    const products = catalogModel.getProducts();
-    
-    const itemCards = products.map(item => {
-        const card = new CardCatalog(cloneTemplate(cardCatalogTemplate), {
-            onClick: () => events.emit('card:select', { id: item.id })
-        });
-        card.category = item.category;
-        card.image = item.image;
-        
-        return card.render(item);
-    });
-    
-    gallery.render({ catalog: itemCards });
-});
+const loadProducts = async (): Promise<void> => {
+    try {
+        const data = await larekApi.getProducts();
+        console.log('Загружено с сервера:', data.items.length);
+        catalogModel.setProducts(data.items);
+    } catch (err) {
+        console.log('Ошибка, использую тестовые данные');
+        catalogModel.setProducts(apiProducts.items);
+    } finally {
+        events.emit('catalog:changed');
+    }
+};
+
+loadProducts();
+
+
 
 
 console.log('начало тестирования модели данных');
@@ -152,28 +159,3 @@ if (productToAdd) {
 
 
 
-const api = new Api(API_URL);
-const apiService = new ApiService(api);
-apiService.getProducts()
-.then((products) => {
-    console.log('данные получены', products);
-})
-.catch ((error) => {
-    console.error('ошибка. данные не получены', error);
-})
-
-
-events.on('catalog:changed', () => {
-    const itemCards = productsModel.getItems().map(item => {
-        const card = new CardCatalog(cloneTemplate(cardCatalogTemplate), {
-            onClick: () => events.emit('card:select', item)
-        });
-        return card.render(item);
-    });
-    gallery.render({ catalog: itemCards });
-});
-larekApi.getProductList()
-    .then((data) => {
-        productsModel.setItems(data.items);
-    })
-    .catch((err) => console.error(err));

@@ -1,54 +1,81 @@
-import { IBuyer, IEvents, TPayment, TValidationErrors } from '../../types';
-import { EventEmitter } from '../base/Events'
+import { IBuyer, TPayment } from '../../types';
+import { EventEmitter } from '../base/Events';
 
 export class Buyer {
-    private _data: IBuyer = {
-        payment: null,
+    private data: IBuyer = {
+        payment: 'card',
         email: '',
         phone: '',
         address: ''
     };
-    private events: IEvents;
+    private events: EventEmitter;
 
     constructor(events: EventEmitter) {
         this.events = events;
     }
-
-    setField<T extends keyof IBuyer>(field: T, value: IBuyer[T]): void {
-        this._data[field] = value;
-        this.events.emit('покупатель изменен', { data: this._data });
-    }
-    setData(data: Partial<IBuyer>): void {
-        this._data = { ...this._data, ...data };
-        this.events.emit('покупатель изменен', { data: this._data });
-    }
     getData(): IBuyer {
-        return this._data;
+        return { ...this.data };
+    }
+    setField<K extends keyof IBuyer>(field: K, value: IBuyer[K]): void {
+        const oldValue = this.data[field];
+        this.data[field] = value;
+        this.events.emit('buyer:field:change', { field, value, oldValue });
+        this.emitBuyerChange();
+    }
+    setPayment(payment: TPayment): void {
+        this.setField('payment', payment);
+    }
+    setEmail(email: string): void {
+        this.setField('email', email);
+    }
+    setPhone(phone: string): void {
+        this.setField('phone', phone);
+    }
+    setAddress(address: string): void {
+        this.setField('address', address);
     }
     clear(): void {
-        this._data = {
-            payment: null,
+        const oldData = { ...this.data };
+        this.data = {
+            payment: 'card',
             email: '',
             phone: '',
             address: ''
         };
-        this.events.emit('покупатель изменен', { data: this._data });
+        this.events.emit('buyer:clear', { oldData });
+        this.emitBuyerChange();
     }
-    validate(): TValidationErrors {
-        const errors: TValidationErrors = {};
-
-        if (!this._data.email) {
-            errors.email = 'Введите корректный email адрес';
-        } 
-        if (!this._data.phone) {
-            errors.phone = 'Введите корректный номер телефона';
-        } 
-        if (!this._data.address) {
-            errors.address = 'Адрес некорректный';
-        } 
-        if (!this._data.payment) {
-            errors.payment = 'Выберите способ оплаты';
+    validate(): Partial<Record<keyof IBuyer, string>> {
+        const errors: Partial<Record<keyof IBuyer, string>> = {};
+        
+        if (!this.data.payment) {
+            errors.payment = 'Не выбран способ оплаты';
         }
+        if (!this.data.email || !this.data.email.includes('@')) {
+            errors.email = 'Укажите корректный email';
+        }
+        if (!this.data.phone || this.data.phone.length < 10) {
+            errors.phone = 'Укажите корректный телефон';
+        }
+        if (!this.data.address || this.data.address.trim() === '') {
+            errors.address = 'Укажите адрес доставки';
+        }
+        
+        this.events.emit('buyer:validate', { errors, isValid: Object.keys(errors).length === 0 });
         return errors;
+    }
+    isComplete(): boolean {
+        const isValid = this.data.email !== '' && 
+                        this.data.phone !== '' && 
+                        this.data.address !== '' && 
+                        this.data.payment !== null;
+        this.events.emit('buyer:complete', { isComplete: isValid });
+        return isValid;
+    }
+    private emitBuyerChange(): void {
+        this.events.emit('buyer:changed', {
+            data: { ...this.data },
+            isValid: this.validate()
+        });
     }
 }
