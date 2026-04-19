@@ -7,23 +7,35 @@ import { apiProducts } from './utils/data';
 import { API_URL } from './utils/constants';
 import { LarekApi } from "./components/View/larekApi";
 import { CardCatalog } from './components/View/CardCatalog';
+import { CardBasket } from './components/View/CardBasket';
 import { Gallery } from './components/View/Gallery';
+import { Header } from './components/View/Header';
+import { Modal } from './components/View/Modal';
+// import { Basket } from './components/View/';
 import { cloneTemplate } from './utils/utils';
 
-// Инициализация
+
 const events = new EventEmitter();
 const catalogModel = new Catalog(events);
 const cartModel = new ShoppingCart(events);
 const buyerModel = new Buyer(events);
 const larekApi = new LarekApi(API_URL);
 
-// DOM элементы
-const galleryContainer = document.querySelector('.gallery') as HTMLElement;
-const gallery = new Gallery(galleryContainer);
-const cardCatalogTemplate = document.querySelector('#card-catalog') as HTMLTemplateElement;
 
-// Создание карточки
-const createCard = (item: any): HTMLElement => {
+const galleryContainer = document.querySelector('.gallery') as HTMLElement;
+const headerContainer = document.querySelector('.header') as HTMLElement;
+const modalContainer = document.querySelector('#modal-container') as HTMLElement;
+
+
+const gallery = new Gallery(galleryContainer);
+const header = new Header(headerContainer, events);
+const modal = new Modal(modalContainer, events);
+
+const cardCatalogTemplate = document.querySelector('#card-catalog') as HTMLTemplateElement;
+const cardBasketTemplate = document.querySelector('#card-basket') as HTMLTemplateElement;
+const basketTemplate = document.querySelector('#basket') as HTMLTemplateElement;
+
+const createCatalogCard = (item: any): HTMLElement => {
     const card = new CardCatalog(cloneTemplate(cardCatalogTemplate), events);
     card.id = item.id;
     card.title = item.title;
@@ -33,12 +45,19 @@ const createCard = (item: any): HTMLElement => {
     return card.render(item);
 };
 
+
 const renderCatalog = (): void => {
     const products = catalogModel.getProducts();
-    const cards = products.map(createCard);
+    const cards = products.map(createCatalogCard);
     gallery.catalog = cards;
     console.log('Каталог обновлен:', cards.length, 'карточек');
 };
+
+
+const updateCartCounter = (): void => {
+    header.counter = cartModel.getItemCount();
+};
+
 events.on('catalog:changed', renderCatalog);
 
 events.on('card:select', (data: { id: string }) => {
@@ -50,18 +69,69 @@ events.on('card:select', (data: { id: string }) => {
     }
 });
 
+
+events.on('card:add-to-basket', (data: { id: string }) => {
+    const product = catalogModel.getProductById(data.id);
+    if (product) {
+        cartModel.addItem(product);
+        console.log(`Добавлено в корзину: ${product.title}`);
+    }
+});
+
+
 events.on('cart:changed', () => {
     console.log('Корзина:', cartModel.getItemCount(), 'товаров на сумму', cartModel.getTotalPrice());
+    updateCartCounter();
+});
+
+events.on('header:basket-open', () => {
+    console.log('Открываем корзину');
+    
+    const items = cartModel.getItems();
+    
+    const basketCards = items.map((item, index) => {
+        const card = new CardBasket(cloneTemplate(cardBasketTemplate), events);
+        card.id = item.id;
+        card.title = item.title;
+        card.price = item.price;
+        card.index = index + 1;
+        return card.render();
+    });
+    
+    const basket = new Basket(cloneTemplate(basketTemplate), events);
+    basket.items = basketCards;
+    basket.total = cartModel.getTotalPrice();
+    
+    modal.setContent(basket.render());
+    modal.open();
+});
+
+events.on('basket:remove', (data: { id: string }) => {
+    console.log('Удаление товара:', data.id);
+    cartModel.removeItem(data.id);
+    events.emit('header:basket-open'); 
+});
+
+events.on('modal:open', () => {
+    console.log('Модальное окно открыто');
+});
+
+events.on('modal:close', () => {
+    console.log('Модальное окно закрыто');
 });
 
 events.on('buyer:changed', (data) => {
     console.log('Покупатель:', data);
 });
+
+
+
+
 const loadProducts = async (): Promise<void> => {
     try {
         const data = await larekApi.getProducts();
-        console.log('Загружено с сервера:', data.items.length);
-        catalogModel.setProducts(data.items);
+        console.log('Загружено с сервера:', data.length);
+        catalogModel.setProducts(data);
     } catch (err) {
         console.log('Ошибка, использую тестовые данные');
         catalogModel.setProducts(apiProducts.items);
@@ -71,6 +141,8 @@ const loadProducts = async (): Promise<void> => {
 };
 
 loadProducts();
+
+
 
 
 

@@ -9,7 +9,7 @@ export class CardBasket extends Card<ICardBasketData> {
     protected priceElement: HTMLElement;
     protected deleteButton: HTMLButtonElement;
     protected events: EventEmitter;
-    protected _id: string = ''; 
+    private cardId: string = '';  
 
     constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
@@ -20,17 +20,19 @@ export class CardBasket extends Card<ICardBasketData> {
         this.priceElement = ensureElement<HTMLElement>('.card__price', this.container);
         this.deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
         
-        this.deleteButton.addEventListener('click', () => {
-            this.events.emit('basket:remove', { id: this._id });  
+        this.deleteButton.addEventListener('click', (e) => {
+            e.stopPropagation();  
+            this.events.emit('basket:remove', { id: this.cardId });
         });
     }
 
     get id(): string {
-        return this._id; 
+        return this.cardId;
     }
 
     set id(value: string) {
-        this._id = value;  
+        this.cardId = value;
+        this.container.dataset.id = value;  
     }
 
     set index(value: number) {

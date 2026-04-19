@@ -49,11 +49,13 @@ export class CardCatalog extends Component<ICardCatalogData> {
       this.container,
     );
 
-    this.container.addEventListener("click", () => {
-      this.events.emit("card:select", { id: this.container.dataset.id });
+     this.container.addEventListener('click', () => {
+        const id = this.container.dataset.id;
+        if (id) {
+            this.events.emit('card:add-to-basket', { id: id });
+        }
     });
-  }
-
+}
   set category(value: string) {
     this.setText(this.categoryElement, value);
 
@@ -82,6 +84,13 @@ export class CardCatalog extends Component<ICardCatalogData> {
       this.setText(this.priceElement, `${value} синапсов`);
     }
   }
+set id(value: string) {
+    this.container.dataset.id = value;
+}
+
+get id(): string {
+    return this.container.dataset.id || '';
+}
 
   render(data: ICardCatalogData): HTMLElement {
     this.title = data.title;
