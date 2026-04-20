@@ -1,4 +1,3 @@
-// src/components/View/CardCatalog.ts
 import { Component } from "../base/Component";
 import { EventEmitter } from "../base/Events";
 import { ensureElement } from "../../utils/utils";
@@ -49,13 +48,18 @@ export class CardCatalog extends Component<ICardCatalogData> {
       this.container,
     );
 
-     this.container.addEventListener('click', () => {
-        const id = this.container.dataset.id;
-        if (id) {
-            this.events.emit('card:add-to-basket', { id: id });
-        }
+    this.container.addEventListener('click', () => {
+      const id = this.container.dataset.id;
+      if (id) {
+        this.events.emit('card:select', { id: id });
+      }
     });
-}
+  }
+
+  get title(): string {
+    return this.titleElement.textContent || '';
+  }
+
   set category(value: string) {
     this.setText(this.categoryElement, value);
 
@@ -70,7 +74,7 @@ export class CardCatalog extends Component<ICardCatalogData> {
   }
 
   set image(value: string) {
-    this.setImage(this.imageElement, value, this.title);
+    this.setImage(this.imageElement, value, this.title); 
   }
 
   set title(value: string) {
@@ -84,22 +88,21 @@ export class CardCatalog extends Component<ICardCatalogData> {
       this.setText(this.priceElement, `${value} синапсов`);
     }
   }
-set id(value: string) {
-    this.container.dataset.id = value;
-}
 
-get id(): string {
+  set id(value: string) {
+    this.container.dataset.id = value;
+  }
+
+  get id(): string {
     return this.container.dataset.id || '';
-}
+  }
 
   render(data: ICardCatalogData): HTMLElement {
     this.title = data.title;
     this.price = data.price;
     this.image = data.image;
     this.category = data.category;
-
     this.container.dataset.id = data.id;
-
     return this.container;
   }
 }

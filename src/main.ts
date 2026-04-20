@@ -11,8 +11,8 @@ import { CardBasket } from './components/View/CardBasket';
 import { Gallery } from './components/View/Gallery';
 import { Header } from './components/View/Header';
 import { Modal } from './components/View/Modal';
-// import { Basket } from './components/View/';
 import { cloneTemplate } from './utils/utils';
+import { Basket } from './components/View/Basket'; 
 
 
 const events = new EventEmitter();
@@ -88,15 +88,15 @@ events.on('header:basket-open', () => {
     console.log('Открываем корзину');
     
     const items = cartModel.getItems();
-    
-    const basketCards = items.map((item, index) => {
-        const card = new CardBasket(cloneTemplate(cardBasketTemplate), events);
-        card.id = item.id;
-        card.title = item.title;
-        card.price = item.price;
-        card.index = index + 1;
-        return card.render();
-    });
+  
+const basketCards = items.map((item, index) => {
+    const card = new CardBasket(cloneTemplate(cardBasketTemplate), events);
+    card.id = item.id;        
+    card.title = item.title;
+    card.price = item.price;
+    card.index = index + 1;
+    return card.render();     
+});
     
     const basket = new Basket(cloneTemplate(basketTemplate), events);
     basket.items = basketCards;

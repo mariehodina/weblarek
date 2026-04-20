@@ -51,13 +51,13 @@ export class CardBasket extends Card<ICardBasketData> {
         }
     }
 
-    render(data?: Partial<ICardBasketData>): HTMLElement {
-        if (data) {
-            if (data.id !== undefined) this.id = data.id;
-            if (data.index !== undefined) this.index = data.index;
-            if (data.title !== undefined) this.title = data.title;
-            if (data.price !== undefined) this.price = data.price;
-        }
-        return this.container;
+render(data?: ICardBasketData): HTMLElement {  
+    if (data) {
+        this.id = data.id;
+        this.title = data.title;
+        this.price = data.price;
+        this.index = data.index;
     }
+    return this.container;
+}
 }
