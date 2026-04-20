@@ -13,19 +13,18 @@ import { Header } from './components/View/Header';
 import { Modal } from './components/View/Modal';
 import { cloneTemplate } from './utils/utils';
 import { Basket } from './components/View/Basket'; 
+import { OrderForm } from './components/View/OrderForm';
+// import { ContactsForm } from './components/View/ContactsForm';
 
 
 const events = new EventEmitter();
 const catalogModel = new Catalog(events);
 const cartModel = new ShoppingCart(events);
-const buyerModel = new Buyer(events);
 const larekApi = new LarekApi(API_URL);
-
 
 const galleryContainer = document.querySelector('.gallery') as HTMLElement;
 const headerContainer = document.querySelector('.header') as HTMLElement;
 const modalContainer = document.querySelector('#modal-container') as HTMLElement;
-
 
 const gallery = new Gallery(galleryContainer);
 const header = new Header(headerContainer, events);
@@ -58,6 +57,7 @@ const updateCartCounter = (): void => {
     header.counter = cartModel.getItemCount();
 };
 
+
 events.on('catalog:changed', renderCatalog);
 
 events.on('card:select', (data: { id: string }) => {
@@ -83,6 +83,44 @@ events.on('cart:changed', () => {
     console.log('Корзина:', cartModel.getItemCount(), 'товаров на сумму', cartModel.getTotalPrice());
     updateCartCounter();
 });
+
+events.on('card:select', (data: { id: string }) => {
+    console.log('Добавление в корзину:', data.id);
+    const product = catalogModel.getProductById(data.id);
+    if (product) {
+        cartModel.addItem(product);
+        updateCartCounter();
+        console.log(`В корзине теперь ${cartModel.getItemCount()} товаров`);
+    }
+});
+
+events.on('catalog:changed', renderCatalog);
+events.on('card:add-to-basket', (data: { id: string }) => {
+    const product = catalogModel.getProductById(data.id);
+    if (product) {
+        cartModel.addItem(product);
+        updateCartCounter();
+    }
+});
+
+
+const orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
+// const contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
+// const successTemplate = document.querySelector('#success') as HTMLTemplateElement;
+events.on('order:start', () => {
+    const items = cartModel.getItems();
+    if (items.length === 0) return;
+    const orderElement = cloneTemplate(orderTemplate);
+    const orderForm = new OrderForm(orderElement, events);
+    modal.setContent(orderForm.render());
+    modal.open();
+});
+events.on('order:submit', (data) => {
+    console.log('Форма отправлена', data);
+});
+
+
+
 
 events.on('header:basket-open', () => {
     console.log('Открываем корзину');
@@ -125,21 +163,22 @@ events.on('buyer:changed', (data) => {
 });
 
 
-
-
 const loadProducts = async (): Promise<void> => {
     try {
-        const data = await larekApi.getProducts();
+        const response: any = await larekApi.getProducts();
+        console.log('Ответ от сервера:', response);
+        
+        const data = response.items || response;
+        
         console.log('Загружено с сервера:', data.length);
         catalogModel.setProducts(data);
     } catch (err) {
-        console.log('Ошибка, использую тестовые данные');
+        console.log('Ошибка, использую тестовые данные:', err);
         catalogModel.setProducts(apiProducts.items);
     } finally {
         events.emit('catalog:changed');
     }
 };
-
 loadProducts();
 
 

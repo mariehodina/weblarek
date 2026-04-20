@@ -17,14 +17,12 @@ export class Modal extends Component<object> {
         
         this.closeButton.addEventListener('click', () => this.close());
         
-        // Закрытие по клику на оверлей
         this.modalElement.addEventListener('click', (event) => {
             if (event.target === this.modalElement) {
                 this.close();
             }
         });
         
-        // Закрытие по Escape
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape' && this.modalElement.classList.contains('modal_active')) {
                 this.close();

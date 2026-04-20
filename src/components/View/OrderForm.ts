@@ -52,6 +52,7 @@ export class OrderForm extends Form<IOrderFormData> {
             address: this._address
         });
     }
+    
 
     set address(value: string) {
         this._address = value;

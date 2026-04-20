@@ -1,12 +1,15 @@
 import { Api } from "../base/Api";
+// import { IProduct } from '../../types';
 
 export class LarekApi extends Api {
   constructor(baseUrl: string) {
     super(baseUrl);
   }
+
   getProducts() {
     return this.get("/product");
   }
+  
   sendOrder(order: {
     items: string[];
     total: number;
