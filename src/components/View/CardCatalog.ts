@@ -20,28 +20,33 @@ export interface ICardCatalogData {
     image: string;
     category: string;
 }
+
 export class CardCatalog extends Component<ICardCatalogData> {
     protected imageElement: HTMLImageElement;
     protected categoryElement: HTMLElement;
     protected titleElement: HTMLElement;
     protected priceElement: HTMLElement;
     protected events: EventEmitter;
+
     constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
         this.events = events;
+        
         this.categoryElement = ensureElement<HTMLElement>(".card__category", this.container);
         this.imageElement = ensureElement<HTMLImageElement>(".card__image", this.container);
         this.titleElement = ensureElement<HTMLElement>(".card__title", this.container);
         this.priceElement = ensureElement<HTMLElement>(".card__price", this.container);
+        
+        // Клик по карточке открывает детали (НЕ добавляет в корзину)
         this.container.addEventListener('click', () => {
-            console.log('Клик по карточке, id:', this.id);
-            this.events.emit('card:add-to-basket', { id: this.id });
+            this.events.emit('card:select', { id: this.id });
         });
     }
 
     set id(value: string) {
         this.container.dataset.id = value;
     }
+
     get id(): string {
         return this.container.dataset.id || '';
     }
@@ -52,6 +57,7 @@ export class CardCatalog extends Component<ICardCatalogData> {
         for (const key in categoryMap) {
             this.categoryElement.classList.remove(categoryMap[key as CategoryKey]);
         }
+        
         const categoryKey = value as CategoryKey;
         if (categoryMap[categoryKey]) {
             this.categoryElement.classList.add(categoryMap[categoryKey]);
@@ -59,16 +65,17 @@ export class CardCatalog extends Component<ICardCatalogData> {
     }
     
     set image(value: string) {
-    console.log('Устанавливаю изображение:', value);
-    if (this.imageElement) {
-        const src = value.startsWith('/') ? value : '/' + value;
-        this.imageElement.src = src;
-        this.imageElement.alt = this.title;
+        if (this.imageElement) {
+            const src = value.startsWith('/') ? value : '/' + value;
+            this.imageElement.src = src;
+            this.imageElement.alt = this.title;
+        }
     }
-}
+    
     set title(value: string) {
         this.setText(this.titleElement, value);
     }
+    
     set price(value: number | null) {
         if (value === null) {
             this.setText(this.priceElement, 'Бесценно');

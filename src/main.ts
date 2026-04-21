@@ -15,6 +15,7 @@ import { cloneTemplate } from "./utils/utils";
 import { Basket } from "./components/View/Basket";
 import { OrderForm } from "./components/View/OrderForm";
 import { ContactsForm } from "./components/View/ContactsForm";
+import { CardPreview } from './components/View/CardPreview';
 
 const events = new EventEmitter();
 const catalogModel = new Catalog(events);
@@ -24,210 +25,206 @@ const larekApi = new LarekApi(API_URL);
 
 const galleryContainer = document.querySelector(".gallery") as HTMLElement;
 const headerContainer = document.querySelector(".header") as HTMLElement;
-const modalContainer = document.querySelector(
-  "#modal-container",
-) as HTMLElement;
+const modalContainer = document.querySelector("#modal-container") as HTMLElement;
 
 const gallery = new Gallery(galleryContainer);
 const header = new Header(headerContainer, events);
 const modal = new Modal(modalContainer, events);
 
-const cardCatalogTemplate = document.querySelector(
-  "#card-catalog",
-) as HTMLTemplateElement;
-const cardBasketTemplate = document.querySelector(
-  "#card-basket",
-) as HTMLTemplateElement;
+const cardCatalogTemplate = document.querySelector("#card-catalog") as HTMLTemplateElement;
+const cardBasketTemplate = document.querySelector("#card-basket") as HTMLTemplateElement;
 const basketTemplate = document.querySelector("#basket") as HTMLTemplateElement;
 const orderTemplate = document.querySelector("#order") as HTMLTemplateElement;
-const contactsTemplate = document.querySelector(
-  "#contacts",
-) as HTMLTemplateElement;
-const successTemplate = document.querySelector(
-  "#success",
-) as HTMLTemplateElement;
+const contactsTemplate = document.querySelector("#contacts") as HTMLTemplateElement;
+const successTemplate = document.querySelector("#success") as HTMLTemplateElement;
+const cardPreviewTemplate = document.querySelector("#card-preview") as HTMLTemplateElement;
 
+// Проверка наличия шаблонов
+console.log('Шаблон card-catalog:', cardCatalogTemplate);
+console.log('Шаблон basket:', basketTemplate);
 
-
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 const createCatalogCard = (item: any): HTMLElement => {
+    console.log('Создаю карточку:', item.title);
     const card = new CardCatalog(cloneTemplate(cardCatalogTemplate), events);
     card.id = item.id;
     card.title = item.title;
     card.price = item.price;
     card.category = item.category;
-    card.image = item.image; 
+    card.image = item.image;
     return card.render(item);
 };
 
-// const loadProducts = async (): Promise<void> => {
-//     try {
-//         const response: any = await larekApi.getProducts();
-//         let products = response.items || response;
-//         products = products.map((item: any) => ({
-//             ...item,
-//             image: CDN_URL + item.image
-//         }));
-//         catalogModel.setProducts(products);
-//     } catch (err) {
-//         const testProducts = apiProducts.items.map((item: any) => ({
-//             ...item,
-//             image: CDN_URL + item.image
-//         }));
-//         catalogModel.setProducts(testProducts);
-//     } finally {
-//         events.emit('catalog:changed');
-//     }
-// };
-
 const renderCatalog = (): void => {
-  const products = catalogModel.getProducts();
-  const cards = products.map(createCatalogCard);
-  gallery.catalog = cards;
-  console.log("Каталог обновлен:", cards.length, "карточек");
+    console.log('renderCatalog вызван');
+    const products = catalogModel.getProducts();
+    console.log('Товаров в модели:', products.length);
+    const cards = products.map(createCatalogCard);
+    console.log('Создано карточек:', cards.length);
+    gallery.catalog = cards;
 };
 
 const updateCartCounter = (): void => {
-  header.counter = cartModel.getItemCount();
+    header.counter = cartModel.getItemCount();
 };
 
-//ПОДПИСКИ НА СОБЫТИЯ
+// Прямая загрузка без async/await
+const loadProducts = (): void => {
+    console.log('loadProducts вызван');
+    
+    // Сразу устанавливаем тестовые данные для проверки
+    // const testProducts = apiProducts.items.map((item: any) => ({
+    //     ...item,
+    //     image: CDN_URL + item.image
+    // }));
+    // catalogModel.setProducts(testProducts);
+    // console.log('Установлены тестовые товары:', testProducts.length);
+    // events.emit('catalog:changed');
+    
+    // Потом пробуем загрузить с сервера
+    larekApi.getProducts()
+    .then((response: any) => {
+        console.log('Данные с сервера получены');
+        let products = response.items || response;
+        products = products.map((item: any) => ({
+            ...item,
+            image: CDN_URL + item.image
+        }));
+        catalogModel.setProducts(products);
+        events.emit('catalog:changed');
+    });
+};
+
 events.on("catalog:changed", renderCatalog);
 
-events.on("card:add-to-basket", (data: { id: string }) => {
-  const product = catalogModel.getProductById(data.id);
-  if (product) {
-    cartModel.addItem(product);
-    updateCartCounter();
-    console.log(`Добавлено в корзину: ${product.title}`);
-  }
+events.on('card:add-to-basket', (data: { id: string }) => {
+    const product = catalogModel.getProductById(data.id);
+    if (product && product.price !== null) {
+        cartModel.addItem(product);
+        updateCartCounter();
+    }
 });
 
 events.on("cart:changed", () => {
-  updateCartCounter();
+    updateCartCounter();
 });
 
 events.on("header:basket-open", () => {
-  const items = cartModel.getItems();
-  const basketCards = items.map((item, index) => {
-    const card = new CardBasket(cloneTemplate(cardBasketTemplate), events);
-    card.id = item.id;
-    card.title = item.title;
-    card.price = item.price;
-    card.index = index + 1;
-    return card.render();
-  });
+    const items = cartModel.getItems();
+    const basketCards = items.map((item, index) => {
+        const card = new CardBasket(cloneTemplate(cardBasketTemplate), events);
+        card.id = item.id;
+        card.title = item.title;
+        card.price = item.price;
+        card.index = index + 1;
+        return card.render();
+    });
 
-  const basket = new Basket(cloneTemplate(basketTemplate), events);
-  basket.items = basketCards;
-  basket.total = cartModel.getTotalPrice();
-  modal.setContent(basket.render());
-  modal.open();
+    const basket = new Basket(cloneTemplate(basketTemplate), events);
+    basket.items = basketCards;
+    basket.total = cartModel.getTotalPrice();
+    modal.setContent(basket.render());
+    modal.open();
 });
 
-events.on("basket:remove", (data: { id: string }) => {
-  cartModel.removeItem(data.id);
-  events.emit("header:basket-open");
+
+events.on('card:select', (data: { id: string }) => {
+    const product = catalogModel.getProductById(data.id);
+    if (product) {
+        const previewCard = new CardPreview(cloneTemplate(cardPreviewTemplate), events);
+        modal.setContent(previewCard.render({
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            image: product.image,
+            category: product.category,
+            description: product.description
+        }));
+        modal.open();
+    }
+});
+events.on('card:add-to-basket', (data: { id: string }) => {
+    const product = catalogModel.getProductById(data.id);
+    if (product && product.price !== null) {
+        cartModel.addItem(product);
+        updateCartCounter();
+        modal.close();
+    }
+});
+events.on('basket:remove', (data: { id: string }) => {
+    cartModel.removeItem(data.id);
+    updateCartCounter();
+    modal.close();
 });
 
-events.on("card:select", (data: { id: string }) => {
-  console.log("Выбрана карточка:", data.id);
-  const product = catalogModel.getProductById(data.id);
-  if (product) {
-    catalogModel.setSelectedProduct(product);
-    console.log("Детали товара:", product.title);
-  }
-});
+
 
 events.on("basket:order", () => {
-  console.log("Открытие формы заказа");
-  const orderFormContainer = cloneTemplate(orderTemplate);
-  const orderForm = new OrderForm(orderFormContainer, events);
-  modal.setContent(orderForm.render());
-  modal.open();
+    const orderFormContainer = cloneTemplate(orderTemplate);
+    const orderForm = new OrderForm(orderFormContainer, events);
+    modal.setContent(orderForm.render());
+    modal.open();
 });
 
-events.on(
-  "order:submit",
-  (data: { payment: "card" | "cash"; address: string }) => {
-    console.log("Форма оплаты отправлена:", data);
+events.on("order:submit", (data: { payment: "card" | "cash"; address: string }) => {
     buyerModel.setField("payment", data.payment);
     buyerModel.setField("address", data.address);
     const contactsFormContainer = cloneTemplate(contactsTemplate);
     const contactsForm = new ContactsForm(contactsFormContainer, events);
     modal.setContent(contactsForm.render());
     modal.open();
-  },
-);
+});
 
-events.on("contacts:submit", (data: { email: string; phone: string }) => {
-  console.log("Форма контактов отправлена:", data);
-  buyerModel.setField("email", data.email);
-  buyerModel.setField("phone", data.phone);
 
-  const order = {
-    items: cartModel.getItems().map((item) => item.id),
-    total: cartModel.getTotalPrice(),
-    payment: buyerModel.getData().payment,
-    address: buyerModel.getData().address,
-    email: buyerModel.getData().email,
-    phone: buyerModel.getData().phone,
-  };
 
-  larekApi
-    .post("/order", order)
-    .then((result: any) => {
-      cartModel.clear();
-      updateCartCounter();
-      events.emit("order:success", { total: result.total || order.total });
-    })
-    .catch(console.error);
+
+events.on('contacts:submit', (data: { email: string, phone: string }) => {
+    buyerModel.setField('email', data.email);
+    buyerModel.setField('phone', data.phone);
+    
+    const validItems = cartModel.getItems().filter(item => item.price !== null);
+    const totalPrice = validItems.reduce((sum, item) => sum + (item.price || 0), 0);
+    
+    const order = {
+        items: validItems.map(item => item.id),
+        total: totalPrice,
+        payment: buyerModel.getData().payment,
+        address: buyerModel.getData().address,
+        email: buyerModel.getData().email,
+        phone: buyerModel.getData().phone
+    };
+    
+    larekApi.post('/order', order)
+        .then((result: any) => {
+            cartModel.clear();
+            updateCartCounter();
+            events.emit('order:success', { total: result.total || order.total });
+        });
 });
 
 events.on("order:success", (data: { total: number }) => {
-  const successContainer = cloneTemplate(successTemplate);
-  const successDescription = successContainer.querySelector(
-    ".order-success__description",
-  ) as HTMLElement;
-  const closeButton = successContainer.querySelector(
-    ".order-success__close",
-  ) as HTMLButtonElement;
+    const successContainer = cloneTemplate(successTemplate);
+    const successDescription = successContainer.querySelector(".order-success__description") as HTMLElement;
+    const closeButton = successContainer.querySelector(".order-success__close") as HTMLButtonElement;
 
-  if (successDescription) {
-    successDescription.textContent = `Списано ${data.total} синапсов`;
-  }
-  closeButton.addEventListener("click", () => {
-    modal.close();
-  });
-  modal.setContent(successContainer);
-  modal.open();
+    if (successDescription) {
+        successDescription.textContent = `Списано ${data.total} синапсов`;
+    }
+    closeButton.addEventListener("click", () => {
+        modal.close();
+    });
+    modal.setContent(successContainer);
+    modal.open();
 });
 
-
-// ЗАГРУЗКА ТОВАРОВ
-const loadProducts = async (): Promise<void> => {
-    try {
-        const response: any = await larekApi.getProducts();
-        console.log('Ответ сервера:', response);
-        let products = response.items || response;
-        products = products.map((item: any) => ({
-            ...item,
-            image: CDN_URL + item.image
-        }));
-        
-        catalogModel.setProducts(products);
-    } catch (err) {
-        console.log('Ошибка, использую тестовые данные:', err);
-        const testProducts = apiProducts.items.map((item: any) => ({
-            ...item,
-            image: CDN_URL + item.image
-        }));
-        catalogModel.setProducts(testProducts);
-    } finally {
-        events.emit('catalog:changed');
-    }
-};
+// ЗАПУСК
 loadProducts();
+
+
+
+
+
+
+
 
 console.log("начало тестирования модели данных");
 console.log("тестирование модели Catalog");
