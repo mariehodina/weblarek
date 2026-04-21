@@ -1,49 +1,37 @@
+// src/components/View/Basket.ts
 import { Component } from '../base/Component';
+import { EventEmitter } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
-import { IEvents } from '../base/Events';
 
-export interface IBasketData {
-    items: HTMLElement[];
-    total: number;
-}
-
-export class Basket extends Component<IBasketData> {
+export class Basket extends Component<{ items: HTMLElement[], total: number }> {
     protected itemsContainer: HTMLElement;
     protected totalElement: HTMLElement;
-    protected buttonElement: HTMLButtonElement;
+    protected orderButton: HTMLButtonElement;
+    protected events: EventEmitter;
 
-    constructor(container: HTMLElement, protected events: IEvents) {
+    constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
+        this.events = events;
         
-        this.itemsContainer = ensureElement<HTMLElement>('.basket__list', container);
-        this.totalElement = ensureElement<HTMLElement>('.basket__price', container);
-        this.buttonElement = ensureElement<HTMLButtonElement>('.basket__button', container);
+        this.itemsContainer = ensureElement<HTMLElement>('.basket__list', this.container);
+        this.totalElement = ensureElement<HTMLElement>('.basket__price', this.container);
+        this.orderButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
         
-        this.buttonElement.addEventListener('click', () => {
-            this.events.emit('order:start');
+        // Кнопка "Оформить"
+        this.orderButton.addEventListener('click', () => {
+            console.log('Кнопка "Оформить" нажата');
+            this.events.emit('basket:order');
         });
     }
 
     set items(items: HTMLElement[]) {
-        if (items.length === 0) {
-            this.itemsContainer.innerHTML = '<p class="basket__empty">Корзина пуста</p>';
-            this.buttonElement.disabled = true;
-        } else {
-            this.itemsContainer.innerHTML = '';
-            items.forEach(item => this.itemsContainer.appendChild(item));
-            this.buttonElement.disabled = false;
-        }
+        this.itemsContainer.innerHTML = '';
+        items.forEach(item => {
+            this.itemsContainer.appendChild(item);
+        });
     }
 
     set total(value: number) {
-        this.totalElement.textContent = `${value} синапсов`;
-    }
-
-    render(data?: IBasketData): HTMLElement {
-        if (data) {
-            this.items = data.items;
-            this.total = data.total;
-        }
-        return this.container;
+        this.setText(this.totalElement, `${value} синапсов`);
     }
 }
