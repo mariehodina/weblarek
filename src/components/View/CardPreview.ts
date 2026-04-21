@@ -57,15 +57,12 @@ export class CardPreview extends Card<ICardPreviewData> {
       this.events.emit("card:add-to-basket", { id: this._id });
     });
   }
-
   get id(): string {
     return this._id;
   }
-
   set id(value: string) {
     this._id = value;
   }
-
   set inBasket(value: boolean) {
     this._inBasket = value;
     if (value) {
@@ -76,7 +73,6 @@ export class CardPreview extends Card<ICardPreviewData> {
       this.buttonElement.disabled = false;
     }
   }
-
   set category(value: string) {
     this.setText(this.categoryElement, value);
     for (const key in categoryMap) {
@@ -86,15 +82,12 @@ export class CardPreview extends Card<ICardPreviewData> {
       );
     }
   }
-
   set image(value: string) {
     this.setImage(this.imageElement, value, this.title);
   }
-
   set title(value: string) {
     this.setText(this.titleElement, value);
   }
-
   set description(value: string) {
     this.setText(this.descriptionElement, value);
   }

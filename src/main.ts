@@ -4,7 +4,7 @@ import { Catalog } from "./components/Models/Catalog";
 import { ShoppingCart } from "./components/Models/ShoppingCart";
 import { Buyer } from "./components/Models/Buyer";
 import { apiProducts } from "./utils/data";
-import { API_URL } from "./utils/constants";
+import { API_URL, CDN_URL } from './utils/constants';
 import { LarekApi } from "./components/View/larekApi";
 import { CardCatalog } from "./components/View/CardCatalog";
 import { CardBasket } from "./components/View/CardBasket";
@@ -48,16 +48,37 @@ const successTemplate = document.querySelector(
 ) as HTMLTemplateElement;
 
 
+
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 const createCatalogCard = (item: any): HTMLElement => {
-  const card = new CardCatalog(cloneTemplate(cardCatalogTemplate), events);
-  card.id = item.id;
-  card.title = item.title;
-  card.price = item.price;
-  card.category = item.category;
-  card.image = item.image;
-  return card.render(item);
+    const card = new CardCatalog(cloneTemplate(cardCatalogTemplate), events);
+    card.id = item.id;
+    card.title = item.title;
+    card.price = item.price;
+    card.category = item.category;
+    card.image = item.image; 
+    return card.render(item);
 };
+
+// const loadProducts = async (): Promise<void> => {
+//     try {
+//         const response: any = await larekApi.getProducts();
+//         let products = response.items || response;
+//         products = products.map((item: any) => ({
+//             ...item,
+//             image: CDN_URL + item.image
+//         }));
+//         catalogModel.setProducts(products);
+//     } catch (err) {
+//         const testProducts = apiProducts.items.map((item: any) => ({
+//             ...item,
+//             image: CDN_URL + item.image
+//         }));
+//         catalogModel.setProducts(testProducts);
+//     } finally {
+//         events.emit('catalog:changed');
+//     }
+// };
 
 const renderCatalog = (): void => {
   const products = catalogModel.getProducts();
@@ -185,15 +206,26 @@ events.on("order:success", (data: { total: number }) => {
 
 // ЗАГРУЗКА ТОВАРОВ
 const loadProducts = async (): Promise<void> => {
-  try {
-    const response: any = await larekApi.getProducts();
-    const data = response.items || response;
-    catalogModel.setProducts(data);
-  } catch (err) {
-    catalogModel.setProducts(apiProducts.items);
-  } finally {
-    events.emit("catalog:changed");
-  }
+    try {
+        const response: any = await larekApi.getProducts();
+        console.log('Ответ сервера:', response);
+        let products = response.items || response;
+        products = products.map((item: any) => ({
+            ...item,
+            image: CDN_URL + item.image
+        }));
+        
+        catalogModel.setProducts(products);
+    } catch (err) {
+        console.log('Ошибка, использую тестовые данные:', err);
+        const testProducts = apiProducts.items.map((item: any) => ({
+            ...item,
+            image: CDN_URL + item.image
+        }));
+        catalogModel.setProducts(testProducts);
+    } finally {
+        events.emit('catalog:changed');
+    }
 };
 loadProducts();
 

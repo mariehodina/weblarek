@@ -10,16 +10,13 @@ export class CardBasket extends Card<ICardBasketData> {
     protected deleteButton: HTMLButtonElement;
     protected events: EventEmitter;
     private cardId: string = '';  
-
     constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
         this.events = events;
-        
         this.indexElement = ensureElement<HTMLElement>('.basket__item-index', this.container);
         this.titleElement = ensureElement<HTMLElement>('.card__title', this.container);
         this.priceElement = ensureElement<HTMLElement>('.card__price', this.container);
         this.deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
-        
         this.deleteButton.addEventListener('click', (e) => {
             e.stopPropagation();  
             this.events.emit('basket:remove', { id: this.cardId });
@@ -29,20 +26,16 @@ export class CardBasket extends Card<ICardBasketData> {
     get id(): string {
         return this.cardId;
     }
-
     set id(value: string) {
         this.cardId = value;
         this.container.dataset.id = value;  
     }
-
     set index(value: number) {
         this.setText(this.indexElement, String(value));
     }
-
     set title(value: string) {
         this.setText(this.titleElement, value);
     }
-
     set price(value: number | null) {
         if (value === null) {
             this.setText(this.priceElement, 'Бесценно');

@@ -16,8 +16,7 @@ export class Basket extends Component<{ items: HTMLElement[], total: number }> {
         this.itemsContainer = ensureElement<HTMLElement>('.basket__list', this.container);
         this.totalElement = ensureElement<HTMLElement>('.basket__price', this.container);
         this.orderButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
-        
-        // Кнопка "Оформить"
+
         this.orderButton.addEventListener('click', () => {
             console.log('Кнопка "Оформить" нажата');
             this.events.emit('basket:order');
@@ -30,7 +29,6 @@ export class Basket extends Component<{ items: HTMLElement[], total: number }> {
             this.itemsContainer.appendChild(item);
         });
     }
-
     set total(value: number) {
         this.setText(this.totalElement, `${value} синапсов`);
     }

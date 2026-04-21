@@ -1,5 +1,4 @@
 import { Api } from "../base/Api";
-// import { IProduct } from '../../types';
 
 export class LarekApi extends Api {
   constructor(baseUrl: string) {
