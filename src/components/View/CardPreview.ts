@@ -20,8 +20,6 @@ export class CardPreview extends Component<ICardPreviewData> {
     protected buttonElement: HTMLButtonElement;
     protected events: EventEmitter;
     private cardId: string = '';
-    private isInBasket: boolean = false;
-    private itemPrice: number | null = null;
 
     constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
@@ -36,11 +34,7 @@ export class CardPreview extends Component<ICardPreviewData> {
         
         this.buttonElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (this.isInBasket) {
-                this.events.emit('basket:remove', { id: this.cardId });
-            } else {
-                this.events.emit('card:add-to-basket', { id: this.cardId });
-            }
+            this.events.emit('card:button-click', { id: this.cardId });
         });
     }
 
@@ -53,32 +47,12 @@ export class CardPreview extends Component<ICardPreviewData> {
         return this.cardId;
     }
 
-    set inBasket(value: boolean) {
-        this.isInBasket = value;
-        this.updateButton();
+    set buttonText(value: string) {
+        this.buttonElement.textContent = value;
     }
 
-    set price(value: number | null) {
-        this.itemPrice = value;
-        if (value === null) {
-            this.setText(this.priceElement, 'Бесценно');
-        } else {
-            this.setText(this.priceElement, `${value} синапсов`);
-        }
-        this.updateButton();
-    }
-
-    private updateButton(): void {
-        if (this.itemPrice === null) {
-            this.buttonElement.textContent = 'Недоступно';
-            this.buttonElement.disabled = true;
-        } else if (this.isInBasket) {
-            this.buttonElement.textContent = 'Удалить из корзины';
-            this.buttonElement.disabled = false;
-        } else {
-            this.buttonElement.textContent = 'Купить';
-            this.buttonElement.disabled = false;
-        }
+    set buttonEnabled(value: boolean) {
+        this.buttonElement.disabled = !value;
     }
 
     set category(value: string) {
@@ -99,6 +73,14 @@ export class CardPreview extends Component<ICardPreviewData> {
     
     set description(value: string) {
         this.setText(this.descriptionElement, value);
+    }
+    
+    set price(value: number | null) {
+        if (value === null) {
+            this.setText(this.priceElement, 'Бесценно');
+        } else {
+            this.setText(this.priceElement, `${value} синапсов`);
+        }
     }
 
     render(data: ICardPreviewData): HTMLElement {

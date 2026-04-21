@@ -39,9 +39,6 @@ const contactsTemplate = document.querySelector("#contacts") as HTMLTemplateElem
 const successTemplate = document.querySelector("#success") as HTMLTemplateElement;
 const cardPreviewTemplate = document.querySelector("#card-preview") as HTMLTemplateElement;
 
-// Проверка наличия шаблонов
-console.log('Шаблон card-catalog:', cardCatalogTemplate);
-console.log('Шаблон basket:', basketTemplate);
 
 const createCatalogCard = (item: any): HTMLElement => {
     console.log('Создаю карточку:', item.title);
@@ -67,32 +64,32 @@ const updateCartCounter = (): void => {
     header.counter = cartModel.getItemCount();
 };
 
-// Прямая загрузка без async/await
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! картинки!!!!!!!!!!!!!!!!!!!!!!!!!
 const loadProducts = (): void => {
-    console.log('loadProducts вызван');
-    
-    // Сразу устанавливаем тестовые данные для проверки
-    // const testProducts = apiProducts.items.map((item: any) => ({
-    //     ...item,
-    //     image: CDN_URL + item.image
-    // }));
-    // catalogModel.setProducts(testProducts);
-    // console.log('Установлены тестовые товары:', testProducts.length);
-    // events.emit('catalog:changed');
-    
-    // Потом пробуем загрузить с сервера
     larekApi.getProducts()
-    .then((response: any) => {
-        console.log('Данные с сервера получены');
-        let products = response.items || response;
-        products = products.map((item: any) => ({
-            ...item,
-            image: CDN_URL + item.image
-        }));
-        catalogModel.setProducts(products);
-        events.emit('catalog:changed');
-    });
+        .then((response: any) => {
+            let products = response.items || response;
+            products = products.map((item: any) => ({
+                ...item,
+                image: CDN_URL + item.image
+            }));
+            catalogModel.setProducts(products);
+            events.emit('catalog:changed');
+        })
+        .catch(() => {
+            const testProducts = apiProducts.items.map((item: any) => ({
+                ...item,
+                image: CDN_URL + item.image
+            }));
+            catalogModel.setProducts(testProducts);
+            events.emit('catalog:changed');
+        });
 };
+
+
+
+
+
 
 events.on("catalog:changed", renderCatalog);
 
@@ -127,33 +124,69 @@ events.on("header:basket-open", () => {
 });
 
 
+
+
+
+
 events.on('card:select', (data: { id: string }) => {
     const product = catalogModel.getProductById(data.id);
     if (product) {
         const previewCard = new CardPreview(cloneTemplate(cardPreviewTemplate), events);
-        modal.setContent(previewCard.render({
+        
+        const cardElement = previewCard.render({
             id: product.id,
             title: product.title,
             price: product.price,
             image: product.image,
             category: product.category,
             description: product.description
-        }));
+        });
+        
+        const inBasket = cartModel.containsItem(product.id);
+        
+        if (product.price === null) {
+            previewCard.buttonText = 'Недоступно';
+            previewCard.buttonEnabled = false;
+        } else if (inBasket) {
+            previewCard.buttonText = 'Удалить из корзины';
+            previewCard.buttonEnabled = true;
+        } else {
+            previewCard.buttonText = 'Купить';
+            previewCard.buttonEnabled = true;
+        }
+        
+        modal.setContent(cardElement);
         modal.open();
     }
 });
-events.on('card:add-to-basket', (data: { id: string }) => {
+
+
+events.on('card:button-click', (data: { id: string }) => {
     const product = catalogModel.getProductById(data.id);
-    if (product && product.price !== null) {
-        cartModel.addItem(product);
+    if (!product) return;
+    
+    const inBasket = cartModel.containsItem(product.id);
+    
+    if (inBasket) {
+       
+        cartModel.removeItem(product.id);
         updateCartCounter();
+        console.log(`Удалено из корзины: ${product.title}`);
         modal.close();
+    } else {
+        
+        if (product.price !== null) {
+            cartModel.addItem(product);
+            updateCartCounter();
+            console.log(`Добавлено в корзину: ${product.title}`);
+            modal.close();
+        }
     }
 });
-events.on('basket:remove', (data: { id: string }) => {
-    cartModel.removeItem(data.id);
+
+
+events.on('cart:changed', () => {
     updateCartCounter();
-    modal.close();
 });
 
 
@@ -216,7 +249,7 @@ events.on("order:success", (data: { total: number }) => {
     modal.open();
 });
 
-// ЗАПУСК
+
 loadProducts();
 
 
