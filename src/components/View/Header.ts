@@ -10,10 +10,8 @@ export class Header extends Component<{ counter: number }> {
     constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
         this.events = events;
-        
         this.basketButton = ensureElement<HTMLButtonElement>('.header__basket', this.container);
         this.counterElement = ensureElement<HTMLElement>('.header__basket-counter', this.container);
-        
         this.basketButton.addEventListener('click', () => {
             this.events.emit('header:basket-open');
         });

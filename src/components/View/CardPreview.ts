@@ -2,6 +2,16 @@ import { Component } from '../base/Component';
 import { EventEmitter } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
 
+const categoryMap = {
+    "софт-скил": "card__category_soft",
+    "хард-скил": "card__category_hard",
+    "другое": "card__category_other",
+    "дополнительное": "card__category_additional",
+    "кнопка": "card__category_button",
+} as const;
+
+type CategoryKey = keyof typeof categoryMap;
+
 export interface ICardPreviewData {
     id: string;
     title: string;
@@ -19,19 +29,16 @@ export class CardPreview extends Component<ICardPreviewData> {
     protected priceElement: HTMLElement;
     protected buttonElement: HTMLButtonElement;
     protected events: EventEmitter;
-    private cardId: string = '';
-
+    private cardId: string = ''; 
     constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
         this.events = events;
-        
         this.categoryElement = ensureElement<HTMLElement>(".card__category", this.container);
         this.imageElement = ensureElement<HTMLImageElement>(".card__image", this.container);
         this.titleElement = ensureElement<HTMLElement>(".card__title", this.container);
         this.descriptionElement = ensureElement<HTMLElement>(".card__text", this.container);
         this.priceElement = ensureElement<HTMLElement>(".card__price", this.container);
         this.buttonElement = ensureElement<HTMLButtonElement>(".card__button", this.container);
-        
         this.buttonElement.addEventListener('click', (e) => {
             e.stopPropagation();
             this.events.emit('card:button-click', { id: this.cardId });
@@ -57,6 +64,13 @@ export class CardPreview extends Component<ICardPreviewData> {
 
     set category(value: string) {
         this.setText(this.categoryElement, value);
+        for (const key in categoryMap) {
+            this.categoryElement.classList.remove(categoryMap[key as CategoryKey]);
+        }
+        const categoryKey = value as CategoryKey;
+        if (categoryMap[categoryKey]) {
+            this.categoryElement.classList.add(categoryMap[categoryKey]);
+        }
     }
     
     set image(value: string) {
@@ -87,9 +101,14 @@ export class CardPreview extends Component<ICardPreviewData> {
         this.id = data.id;
         this.title = data.title;
         this.price = data.price;
-        this.image = data.image;
-        this.category = data.category;
-        this.description = data.description;
-        return this.container;
+        if (this.imageElement) {
+        const imageUrl = data.image.startsWith('http') ? data.image : '/' + data.image.replace(/^\//, '');
+        console.log('Устанавливаю URL:', imageUrl);
+        this.imageElement.src = imageUrl;
+        this.imageElement.alt = data.title;
     }
+    this.category = data.category;
+    this.description = data.description;
+    return this.container;
+}
 }

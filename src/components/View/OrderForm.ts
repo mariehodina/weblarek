@@ -15,16 +15,13 @@ export class OrderForm extends Component<IOrderFormData> {
     protected events: EventEmitter;
     protected _payment: 'card' | 'cash' | null = null;
     protected _address: string = '';
-
     constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
         this.events = events;
-        
         this.addressInput = ensureElement<HTMLInputElement>('input[name="address"]', this.container);
         this.submitButton = ensureElement<HTMLButtonElement>('.order__button', this.container);
         this.errorElement = ensureElement<HTMLElement>('.form__errors', this.container);
         this.paymentButtons = Array.from(this.container.querySelectorAll('.order__buttons button'));
-        
         this.paymentButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const paymentType = button.getAttribute('name') as 'card' | 'cash';
@@ -46,13 +43,11 @@ export class OrderForm extends Component<IOrderFormData> {
                 });
             }
         });
-        
         this.validate();
     }
 
     setPayment(type: 'card' | 'cash'): void {
         this._payment = type;
-        
         this.paymentButtons.forEach(button => {
             const buttonType = button.getAttribute('name');
             if (buttonType === type) {
@@ -61,7 +56,6 @@ export class OrderForm extends Component<IOrderFormData> {
                 button.classList.remove('button_alt-active');
             }
         });
-        
         this.validate();
     }
 
@@ -69,7 +63,6 @@ export class OrderForm extends Component<IOrderFormData> {
         const paymentSelected = this._payment !== null;
         const addressFilled = this._address.trim() !== '';
         this.submitButton.disabled = !(paymentSelected && addressFilled);
-        
         if (!paymentSelected && !addressFilled) {
             this.setText(this.errorElement, '');
         } else if (!paymentSelected) {

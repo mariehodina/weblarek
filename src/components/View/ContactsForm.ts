@@ -15,16 +15,13 @@ export class ContactsForm extends Component<IContactsFormData> {
     protected events: EventEmitter;
     protected _email: string = '';
     protected _phone: string = '';
-
     constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
         this.events = events;
-        
         this.emailInput = ensureElement<HTMLInputElement>('input[name="email"]', this.container);
         this.phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
         this.submitButton = ensureElement<HTMLButtonElement>('button[type="submit"]', this.container);
         this.errorElement = ensureElement<HTMLElement>('.form__errors', this.container);
-        
         this.emailInput.addEventListener('input', () => {
             this._email = this.emailInput.value;
             this.validate();
@@ -52,9 +49,7 @@ export class ContactsForm extends Component<IContactsFormData> {
         const emailValid = this._email.includes('@') && this._email.length > 3;
         const phoneValid = this._phone.length >= 10;
         const isValid = emailValid && phoneValid;
-        
         this.submitButton.disabled = !isValid;
-        
          if (!emailValid && !phoneValid) {
             this.setText(this.errorElement, '');
         } else if  (!emailValid) {

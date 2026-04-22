@@ -27,7 +27,6 @@ export class Basket extends Component<{ items: HTMLElement[], total: number }> {
         items.forEach(item => {
             this.itemsContainer.appendChild(item);
         });
-        
         this.orderButton.disabled = items.length === 0;
     }
 

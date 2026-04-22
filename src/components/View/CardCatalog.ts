@@ -1,4 +1,3 @@
-// src/components/View/CardCatalog.ts
 import { Component } from '../base/Component';
 import { EventEmitter } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
@@ -27,17 +26,13 @@ export class CardCatalog extends Component<ICardCatalogData> {
     protected titleElement: HTMLElement;
     protected priceElement: HTMLElement;
     protected events: EventEmitter;
-
     constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
         this.events = events;
-        
         this.categoryElement = ensureElement<HTMLElement>(".card__category", this.container);
         this.imageElement = ensureElement<HTMLImageElement>(".card__image", this.container);
         this.titleElement = ensureElement<HTMLElement>(".card__title", this.container);
         this.priceElement = ensureElement<HTMLElement>(".card__price", this.container);
-        
-        
         this.container.addEventListener('click', () => {
             this.events.emit('card:select', { id: this.id });
         });
@@ -53,11 +48,9 @@ export class CardCatalog extends Component<ICardCatalogData> {
 
     set category(value: string) {
         this.setText(this.categoryElement, value);
-        
         for (const key in categoryMap) {
             this.categoryElement.classList.remove(categoryMap[key as CategoryKey]);
         }
-        
         const categoryKey = value as CategoryKey;
         if (categoryMap[categoryKey]) {
             this.categoryElement.classList.add(categoryMap[categoryKey]);

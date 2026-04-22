@@ -15,7 +15,6 @@ export class ApiService {
         }
     }
 
-
     async sendOrder(order: IOrder): Promise<IOrderResult> {
         try {
             const result = await this.api.post<IOrderResult>('/order', order);
