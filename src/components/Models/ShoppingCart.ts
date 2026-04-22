@@ -20,7 +20,6 @@ export class ShoppingCart {
             return;
         }
 
-        // Проверка: нет ли уже такого товара
         if (!this.containsItem(product.id)) {
             this.items.push(product);
             this.events.emit('cart:add', { product });

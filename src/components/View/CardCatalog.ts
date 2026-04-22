@@ -37,7 +37,7 @@ export class CardCatalog extends Component<ICardCatalogData> {
         this.titleElement = ensureElement<HTMLElement>(".card__title", this.container);
         this.priceElement = ensureElement<HTMLElement>(".card__price", this.container);
         
-        // Клик по карточке открывает детали (НЕ добавляет в корзину)
+        
         this.container.addEventListener('click', () => {
             this.events.emit('card:select', { id: this.id });
         });

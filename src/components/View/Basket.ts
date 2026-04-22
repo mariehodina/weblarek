@@ -1,4 +1,3 @@
-// src/components/View/Basket.ts
 import { Component } from '../base/Component';
 import { EventEmitter } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
@@ -28,7 +27,10 @@ export class Basket extends Component<{ items: HTMLElement[], total: number }> {
         items.forEach(item => {
             this.itemsContainer.appendChild(item);
         });
+        
+        this.orderButton.disabled = items.length === 0;
     }
+
     set total(value: number) {
         this.setText(this.totalElement, `${value} синапсов`);
     }

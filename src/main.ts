@@ -207,7 +207,12 @@ events.on("order:submit", (data: { payment: "card" | "cash"; address: string }) 
     modal.open();
 });
 
-
+events.on('basket:remove', (data: { id: string }) => {
+    console.log('Удаление товара из корзины:', data.id);
+    cartModel.removeItem(data.id);
+    updateCartCounter();
+    events.emit('header:basket-open');
+});
 
 
 events.on('contacts:submit', (data: { email: string, phone: string }) => {
