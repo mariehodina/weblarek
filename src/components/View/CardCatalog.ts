@@ -64,13 +64,12 @@ export class CardCatalog extends Component<ICardCatalogData> {
         }
     }
     
-    set image(value: string) {
-        if (this.imageElement) {
-            const src = value.startsWith('/') ? value : '/' + value;
-            this.imageElement.src = src;
-            this.imageElement.alt = this.title;
-        }
+  set image(value: string) {
+    if (this.imageElement) {
+        this.imageElement.src = value;
+        this.imageElement.alt = this.title;
     }
+}
     
     set title(value: string) {
         this.setText(this.titleElement, value);
