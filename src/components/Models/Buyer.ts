@@ -43,14 +43,10 @@ export class Buyer {
 
     if (!this.data.email) {
       errors.email = "Введите email";
-    } else if (!this.data.email.includes("@")) {
-      errors.email = "Неверный формат email";
     }
 
     if (!this.data.phone) {
-      errors.phone = "Введите телефон";
-    } else if (this.data.phone.length < 10) {
-      errors.phone = "Слишком короткий номер";
+      errors.phone = "введите номер";
     }
 
     if (!this.data.address) {

@@ -76,6 +76,16 @@ export interface IProductsResponse {
     items: IProduct[]; 
 }
 
+export const categoryMap = {
+    "софт-скил": "card__category_soft",
+    "хард-скил": "card__category_hard",
+    "другое": "card__category_other",
+    "дополнительное": "card__category_additional",
+    "кнопка": "card__category_button",
+} as const;
+
+export type CategoryKey = keyof typeof categoryMap;
+
 export interface IEvents {
     on<T extends object>(event: string, callback: (data: T) => void): void;
     emit<T extends object>(event: string, data?: T): void;

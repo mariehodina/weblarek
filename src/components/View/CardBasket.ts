@@ -1,13 +1,7 @@
 import { Card } from "../base/Card";
+import { ICardBasketData } from "../../types";
 import { IEvents } from "../../types";
 import { ensureElement } from "../../utils/utils";
-
-export interface ICardBasketData {
-  id: string;
-  title: string;
-  price: number | null;
-  index: number;
-}
 
 export class CardBasket extends Card<ICardBasketData> {
   protected indexElement: HTMLElement;

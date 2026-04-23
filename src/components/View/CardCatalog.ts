@@ -1,23 +1,6 @@
 import { Card } from "../base/Card";
+import { ICardCatalogData, categoryMap, CategoryKey } from "../../types";
 import { ensureElement } from "../../utils/utils";
-
-const categoryMap = {
-  "софт-скил": "card__category_soft",
-  "хард-скил": "card__category_hard",
-  другое: "card__category_other",
-  дополнительное: "card__category_additional",
-  кнопка: "card__category_button",
-} as const;
-
-type CategoryKey = keyof typeof categoryMap;
-
-export interface ICardCatalogData {
-  id: string;
-  title: string;
-  price: number | null;
-  image: string;
-  category: string;
-}
 
 export interface ICardCatalogActions {
   onClick: (id: string) => void;
