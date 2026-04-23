@@ -1,56 +1,49 @@
-import { Card } from '../base/Card';
-import { ICardBasketData } from '../../types';
-import { ensureElement } from '../../utils/utils';
-import { EventEmitter } from '../base/Events';
+import { Card } from "../base/Card";
+import { IEvents } from "../../types";
+import { ensureElement } from "../../utils/utils";
+
+export interface ICardBasketData {
+  id: string;
+  title: string;
+  price: number | null;
+  index: number;
+}
 
 export class CardBasket extends Card<ICardBasketData> {
-    protected indexElement: HTMLElement;
-    protected titleElement: HTMLElement;
-    protected priceElement: HTMLElement;
-    protected deleteButton: HTMLButtonElement;
-    protected events: EventEmitter;
-    private cardId: string = '';  
-    constructor(container: HTMLElement, events: EventEmitter) {
-        super(container);
-        this.events = events;
-        this.indexElement = ensureElement<HTMLElement>('.basket__item-index', this.container);
-        this.titleElement = ensureElement<HTMLElement>('.card__title', this.container);
-        this.priceElement = ensureElement<HTMLElement>('.card__price', this.container);
-        this.deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
-        this.deleteButton.addEventListener('click', (e) => {
-            e.stopPropagation();  
-            this.events.emit('basket:remove', { id: this.cardId });
-        });
-    }
+  protected indexElement: HTMLElement;
+  protected deleteButton: HTMLButtonElement;
 
-    get id(): string {
-        return this.cardId;
-    }
-    set id(value: string) {
-        this.cardId = value;
-        this.container.dataset.id = value;  
-    }
-    set index(value: number) {
-        this.setText(this.indexElement, String(value));
-    }
-    set title(value: string) {
-        this.setText(this.titleElement, value);
-    }
-    set price(value: number | null) {
-        if (value === null) {
-            this.setText(this.priceElement, 'Бесценно');
-        } else {
-            this.setText(this.priceElement, `${value} синапсов`);
-        }
-    }
+  constructor(container: HTMLElement, events: IEvents) {
+    super(container);
 
-render(data?: ICardBasketData): HTMLElement {  
-    if (data) {
-        this.id = data.id;
-        this.title = data.title;
-        this.price = data.price;
-        this.index = data.index;
+    this.indexElement = ensureElement<HTMLElement>(
+      ".basket__item-index",
+      this.container,
+    );
+    this.deleteButton = ensureElement<HTMLButtonElement>(
+      ".basket__item-delete",
+      this.container,
+    );
+
+    this.deleteButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = this.container.dataset.id;
+      if (id) {
+        events.emit("basket:remove", { id });
+      }
+    });
+  }
+
+  set index(value: number) {
+    if (this.indexElement) {
+      this.indexElement.textContent = String(value);
     }
+  }
+
+  render(data: ICardBasketData): HTMLElement {
+    super.render(data);
+    this.container.dataset.id = data.id;
+    this.index = data.index;
     return this.container;
-}
+  }
 }

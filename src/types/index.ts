@@ -36,6 +36,7 @@ export interface ICardPreviewData {
     image: string;
     category: string;
     description: string;
+    inBasket?: boolean; 
 }
 
 export interface IGalleryData {
@@ -55,7 +56,7 @@ export interface IContactsFormData {
 export type TPayment = 'card' | 'cash' | null;
 
 export interface IBuyer {
-    payment: TPayment;
+    payment: 'card' | 'cash' | null;
     email: string;
     phone: string;
     address: string;

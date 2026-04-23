@@ -1,5 +1,4 @@
-import { Component } from '../base/Component';
-import { EventEmitter } from '../base/Events';
+import { Card } from '../base/Card';
 import { ensureElement } from '../../utils/utils';
 
 const categoryMap = {
@@ -19,96 +18,96 @@ export interface ICardPreviewData {
     image: string;
     category: string;
     description: string;
+    inBasket?: boolean;
 }
 
-export class CardPreview extends Component<ICardPreviewData> {
+export interface ICardPreviewActions {
+    onButtonClick: (id: string) => void;
+}
+
+export class CardPreview extends Card<ICardPreviewData> {
     protected imageElement: HTMLImageElement;
     protected categoryElement: HTMLElement;
-    protected titleElement: HTMLElement;
     protected descriptionElement: HTMLElement;
-    protected priceElement: HTMLElement;
     protected buttonElement: HTMLButtonElement;
-    protected events: EventEmitter;
-    private cardId: string = ''; 
-    constructor(container: HTMLElement, events: EventEmitter) {
+
+    constructor(container: HTMLElement, actions?: ICardPreviewActions) {
         super(container);
-        this.events = events;
+        
         this.categoryElement = ensureElement<HTMLElement>(".card__category", this.container);
         this.imageElement = ensureElement<HTMLImageElement>(".card__image", this.container);
-        this.titleElement = ensureElement<HTMLElement>(".card__title", this.container);
         this.descriptionElement = ensureElement<HTMLElement>(".card__text", this.container);
-        this.priceElement = ensureElement<HTMLElement>(".card__price", this.container);
         this.buttonElement = ensureElement<HTMLButtonElement>(".card__button", this.container);
-        this.buttonElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.events.emit('card:button-click', { id: this.cardId });
-        });
-    }
-
-    set id(value: string) {
-        this.cardId = value;
-        this.container.dataset.id = value;
-    }
-
-    get id(): string {
-        return this.cardId;
-    }
-
-    set buttonText(value: string) {
-        this.buttonElement.textContent = value;
-    }
-
-    set buttonEnabled(value: boolean) {
-        this.buttonElement.disabled = !value;
+        
+        if (actions?.onButtonClick) {
+            this.buttonElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = this.container.dataset.id;
+                if (id) {
+                    actions.onButtonClick(id);
+                }
+            });
+        }
     }
 
     set category(value: string) {
-        this.setText(this.categoryElement, value);
-        for (const key in categoryMap) {
-            this.categoryElement.classList.remove(categoryMap[key as CategoryKey]);
-        }
-        const categoryKey = value as CategoryKey;
-        if (categoryMap[categoryKey]) {
-            this.categoryElement.classList.add(categoryMap[categoryKey]);
+        if (this.categoryElement) {
+            this.categoryElement.textContent = value;
+            
+            for (const key in categoryMap) {
+                this.categoryElement.classList.remove(categoryMap[key as CategoryKey]);
+            }
+            
+            const categoryKey = value as CategoryKey;
+            if (categoryMap[categoryKey]) {
+                this.categoryElement.classList.add(categoryMap[categoryKey]);
+            }
         }
     }
     
     set image(value: string) {
         if (this.imageElement) {
-            const src = value.startsWith('/') ? value : '/' + value;
-            this.imageElement.src = src;
+            this.imageElement.src = value;
             this.imageElement.alt = this.title;
         }
     }
     
-    set title(value: string) {
-        this.setText(this.titleElement, value);
-    }
-    
     set description(value: string) {
-        this.setText(this.descriptionElement, value);
+        if (this.descriptionElement) {
+            this.descriptionElement.textContent = value;
+        }
     }
-    
-    set price(value: number | null) {
-        if (value === null) {
-            this.setText(this.priceElement, 'Бесценно');
-        } else {
-            this.setText(this.priceElement, `${value} синапсов`);
+
+    set buttonText(value: string) {
+        if (this.buttonElement) {
+            this.buttonElement.textContent = value;
+        }
+    }
+
+    set buttonEnabled(value: boolean) {
+        if (this.buttonElement) {
+            this.buttonElement.disabled = !value;
         }
     }
 
     render(data: ICardPreviewData): HTMLElement {
-        this.id = data.id;
-        this.title = data.title;
-        this.price = data.price;
-        if (this.imageElement) {
-        const imageUrl = data.image.startsWith('http') ? data.image : '/' + data.image.replace(/^\//, '');
-        console.log('Устанавливаю URL:', imageUrl);
-        this.imageElement.src = imageUrl;
-        this.imageElement.alt = data.title;
+        super.render(data);
+        this.container.dataset.id = data.id;
+        this.image = data.image;
+        this.category = data.category;
+        this.description = data.description;
+        
+        if (data.price === null) {
+            this.buttonText = 'Недоступно';
+            this.buttonEnabled = false;
+        } else if (data.inBasket) {
+            this.buttonText = 'Удалить из корзины';
+            this.buttonEnabled = true;
+        } else {
+            this.buttonText = 'Купить';
+            this.buttonEnabled = true;
+        }
+        
+        return this.container;
     }
-    this.category = data.category;
-    this.description = data.description;
-    return this.container;
-}
 }

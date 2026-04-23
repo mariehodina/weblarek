@@ -1,51 +1,54 @@
-
-import { Component } from './Component';
-import { EventEmitter } from './Events';
+import { Component } from "./Component";
+import { IEvents } from "../../types";
 
 export abstract class Form<T> extends Component<T> {
-    protected events: EventEmitter;
-    protected formElement: HTMLFormElement;
-    protected submitButton: HTMLButtonElement;
-    protected _isValid: boolean = false;
+  protected events: IEvents;
+  protected formElement: HTMLFormElement;
+  protected submitButton: HTMLButtonElement;
+  protected errorElements: Map<string, HTMLElement> = new Map();
 
-    constructor(container: HTMLElement, events: EventEmitter) {
-        super(container);
-        this.events = events;
-        this.formElement = container as HTMLFormElement;
-        this.submitButton = this.formElement.querySelector('.form__submit') as HTMLButtonElement;
-        
-        this.formElement.addEventListener('submit', (e: Event) => {
-            e.preventDefault();
-            if (this._isValid) {
-                this.onSubmit();
-            }
-        });
+  constructor(container: HTMLElement, events: IEvents) {
+    super(container);
+    this.events = events;
+    this.formElement = container as HTMLFormElement;
+    this.submitButton = this.formElement.querySelector(
+      ".order__button",
+    ) as HTMLButtonElement;
+    if (!this.submitButton) {
+      this.submitButton = this.formElement.querySelector(
+        'button[type="submit"]',
+      ) as HTMLButtonElement;
     }
 
-    protected abstract onInputChange(field: keyof T, value: string): void;
+    const allErrors = this.formElement.querySelectorAll(
+      '[class*="form__error_"]',
+    );
+    allErrors.forEach((error) => {
+      const className = error.className;
+      const match = className.match(/form__error_(\w+)/);
+      if (match) {
+        this.errorElements.set(match[1], error as HTMLElement);
+      }
+    });
 
-    protected onSubmit(): void {
-        this.events.emit(`${this.formElement.id}:submit`);
-    }
+    this.formElement.addEventListener("submit", (e: Event) => {
+      e.preventDefault();
+      this.onSubmit();
+    });
+  }
 
-    protected setValid(value: boolean): void {
-        this._isValid = value;
-        if (this.submitButton) {
-            this.submitButton.disabled = !value;
-        }
+  protected setValid(isValid: boolean): void {
+    if (this.submitButton) {
+      this.submitButton.disabled = !isValid;
     }
+  }
 
-    protected setError(field: keyof T, message: string): void {
-        const errorElement = this.formElement.querySelector(`.form__error_${String(field)}`);
-        if (errorElement) {
-            this.setText(errorElement as HTMLElement, message);
-        }
+  protected setFieldError(field: keyof T, message: string): void {
+    const errorElement = this.errorElements.get(String(field));
+    if (errorElement) {
+      errorElement.textContent = message;
     }
+  }
 
-    protected clearErrors(): void {
-        const errors = this.formElement.querySelectorAll('[class*="form__error_"]');
-        errors.forEach(error => {
-            this.setText(error as HTMLElement, '');
-        });
-    }
+  protected abstract onSubmit(): void;
 }

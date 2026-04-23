@@ -10,7 +10,7 @@ export class Gallery extends Component<IGalleryData> {
         if (items && items.length) {
             this.container.replaceChildren(...items);
         } else {
-            this.container.innerHTML = '<p class="gallery__empty">Товары отсутствуют</p>';
+            this.container.replaceChildren();
         }
     }
 }
