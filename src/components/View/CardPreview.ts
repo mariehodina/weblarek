@@ -1,106 +1,78 @@
-import { Card } from "../base/Card";
-import { ICardPreviewData, categoryMap, CategoryKey } from "../../types";
+import { Card } from "./Card";
+import { IProduct } from "../../types";
+import { categoryMap } from "../../utils/constants";
 import { ensureElement } from "../../utils/utils";
 
-export interface ICardPreviewActions {
-  onButtonClick: (id: string) => void;
+export type TCardPreview = Pick<IProduct, 'category' | 'description'> & {
+    image: {
+        src: string;
+        alt?: string;
+    };
+    buttonText: string;
+    buttonNone: boolean;
+};
+
+interface ICardPreviewActions {
+    onClick: () => void;
 }
 
-export class CardPreview extends Card<ICardPreviewData> {
-  protected imageElement: HTMLImageElement;
-  protected categoryElement: HTMLElement;
-  protected descriptionElement: HTMLElement;
-  protected buttonElement: HTMLButtonElement;
+export class CardPreview extends Card<TCardPreview> {
+    protected imageElement: HTMLImageElement;
+    protected categoryElement: HTMLElement;
+    protected textElement: HTMLElement;
+    protected buttonElement: HTMLButtonElement;
 
-  constructor(container: HTMLElement, actions?: ICardPreviewActions) {
-    super(container);
+    constructor(container: HTMLElement, actions?: ICardPreviewActions) {
+        super(container);
 
-    this.categoryElement = ensureElement<HTMLElement>(
-      ".card__category",
-      this.container,
-    );
-    this.imageElement = ensureElement<HTMLImageElement>(
-      ".card__image",
-      this.container,
-    );
-    this.descriptionElement = ensureElement<HTMLElement>(
-      ".card__text",
-      this.container,
-    );
-    this.buttonElement = ensureElement<HTMLButtonElement>(
-      ".card__button",
-      this.container,
-    );
+        this.imageElement = ensureElement<HTMLImageElement>('.card__image', container);
+        this.categoryElement = ensureElement<HTMLElement>('.card__category', container);
+        this.textElement = ensureElement<HTMLElement>('.card__text', container);
+        this.buttonElement = ensureElement<HTMLButtonElement>('.card__button', container);
 
-    if (actions?.onButtonClick) {
-      this.buttonElement.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const id = this.container.dataset.id;
-        if (id) {
-          actions.onButtonClick(id);
+        if (actions?.onClick) {
+            this.buttonElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!this.buttonElement.disabled) {
+                    actions.onClick();
+                }
+            });
         }
-      });
-    }
-  }
-
-  set category(value: string) {
-    if (this.categoryElement) {
-      this.categoryElement.textContent = value;
-
-      for (const key in categoryMap) {
-        this.categoryElement.classList.remove(categoryMap[key as CategoryKey]);
-      }
-
-      const categoryKey = value as CategoryKey;
-      if (categoryMap[categoryKey]) {
-        this.categoryElement.classList.add(categoryMap[categoryKey]);
-      }
-    }
-  }
-
-  set image(value: string) {
-    if (this.imageElement) {
-      this.imageElement.src = value;
-      this.imageElement.alt = this.title;
-    }
-  }
-
-  set description(value: string) {
-    if (this.descriptionElement) {
-      this.descriptionElement.textContent = value;
-    }
-  }
-
-  set buttonText(value: string) {
-    if (this.buttonElement) {
-      this.buttonElement.textContent = value;
-    }
-  }
-
-  set buttonEnabled(value: boolean) {
-    if (this.buttonElement) {
-      this.buttonElement.disabled = !value;
-    }
-  }
-
-  render(data: ICardPreviewData): HTMLElement {
-    super.render(data);
-    this.container.dataset.id = data.id;
-    this.image = data.image;
-    this.category = data.category;
-    this.description = data.description;
-
-    if (data.price === null) {
-      this.buttonText = "Недоступно";
-      this.buttonEnabled = false;
-    } else if (data.inBasket) {
-      this.buttonText = "Удалить из корзины";
-      this.buttonEnabled = true;
-    } else {
-      this.buttonText = "Купить";
-      this.buttonEnabled = true;
     }
 
-    return this.container;
-  }
+    set image(value: { src: string; alt?: string }) {
+        this.setImage(this.imageElement, value.src, value.alt);
+    }
+
+    set category(value: string) {
+        this.categoryElement.textContent = value;
+        for (const key in categoryMap) {
+            this.categoryElement.classList.toggle(
+                categoryMap[key as keyof typeof categoryMap],
+                key === value
+            );
+        }
+    }
+
+    set text(value: string) {
+        this.textElement.textContent = value;
+    }
+
+    set buttonText(value: string) {
+        this.buttonElement.textContent = value;
+    }
+
+    set buttonNone(value: boolean) {
+        this.buttonElement.disabled = value;
+    }
+
+    set price(value: number | null) {
+        if (this.priceElement) {
+            if (value === null) {
+                this.priceElement.textContent = '';
+            } else {
+                this.priceElement.textContent = `${value} синапсов`;
+            }
+        }
+    }
 }

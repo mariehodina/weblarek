@@ -5,6 +5,8 @@ export interface IApi {
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
+export type TPayment = 'card' | 'cash';
+
 export interface IProduct {
     id: string;
     description: string;
@@ -14,57 +16,11 @@ export interface IProduct {
     price: number | null;
 }
 
-export interface ICardCatalogData {
-    id: string;
-    title: string;
-    price: number | null;
-    image: string;
-    category: string;
-}
-
-export interface ICardBasketData {
-    id: string;
-    title: string;
-    price: number | null;
-    index: number;
-}
-
-export interface ICardPreviewData {
-    id: string;
-    title: string;
-    price: number | null;
-    image: string;
-    category: string;
-    description: string;
-    inBasket?: boolean; 
-}
-
-export interface IGalleryData {
-    catalog: HTMLElement[];
-}
-
-export interface IOrderFormData {
-    payment: 'card' | 'cash' | null;
-    address: string;
-}
-
-export interface IContactsFormData {
-    email: string;
-    phone: string;
-}
-
-export type TPayment = 'card' | 'cash' | null;
-
 export interface IBuyer {
-    payment: 'card' | 'cash' | null;
+    payment: TPayment | null;
     email: string;
     phone: string;
     address: string;
-}
-
-export interface IOrder extends IBuyer {
-    items: string[];  
-    total: number;    
 }
 
 export interface IOrderResult {
@@ -76,20 +32,16 @@ export interface IProductsResponse {
     items: IProduct[]; 
 }
 
-export const categoryMap = {
-    "софт-скил": "card__category_soft",
-    "хард-скил": "card__category_hard",
-    "другое": "card__category_other",
-    "дополнительное": "card__category_additional",
-    "кнопка": "card__category_button",
-} as const;
-
-export type CategoryKey = keyof typeof categoryMap;
-
-export interface IEvents {
-    on<T extends object>(event: string, callback: (data: T) => void): void;
-    emit<T extends object>(event: string, data?: T): void;
-    trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void;
+export type IOrder = IBuyer & {
+    items: string[];
+    total: number;
 }
 
-export type TValidationErrors = Partial<Record<keyof IBuyer, string>>;
+export interface ValidationErrors {
+    payment?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+}
+
+

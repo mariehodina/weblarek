@@ -1,43 +1,29 @@
-import { Card } from "../base/Card";
-import { ICardBasketData } from "../../types";
-import { IEvents } from "../../types";
+import { Card } from "./Card";
 import { ensureElement } from "../../utils/utils";
 
-export class CardBasket extends Card<ICardBasketData> {
-  protected indexElement: HTMLElement;
-  protected deleteButton: HTMLButtonElement;
+interface ICardBasket {
+    onClick: () => void;
+}
 
-  constructor(container: HTMLElement, events: IEvents) {
-    super(container);
+export class CardBasket extends Card<{ index: number }> {
+    protected indexElement: HTMLElement;
+    protected deleteButtonElement: HTMLButtonElement;
 
-    this.indexElement = ensureElement<HTMLElement>(
-      ".basket__item-index",
-      this.container,
-    );
-    this.deleteButton = ensureElement<HTMLButtonElement>(
-      ".basket__item-delete",
-      this.container,
-    );
+    constructor(container: HTMLElement, actions?: ICardBasket) {
+        super(container);
 
-    this.deleteButton.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const id = this.container.dataset.id;
-      if (id) {
-        events.emit("basket:remove", { id });
-      }
-    });
-  }
-
-  set index(value: number) {
-    if (this.indexElement) {
-      this.indexElement.textContent = String(value);
+        this.indexElement = ensureElement<HTMLElement>('.basket__item-index', container);
+        this.deleteButtonElement = ensureElement<HTMLButtonElement>('.basket__item-delete', container);
+        
+         if (actions?.onClick) {
+            this.deleteButtonElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                actions.onClick();
+            });
+        }
     }
-  }
 
-  render(data: ICardBasketData): HTMLElement {
-    super.render(data);
-    this.container.dataset.id = data.id;
-    this.index = data.index;
-    return this.container;
-  }
+    set index(value: number) {
+        this.indexElement.textContent = String(value);
+    }
 }

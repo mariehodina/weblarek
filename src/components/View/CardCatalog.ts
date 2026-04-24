@@ -1,64 +1,45 @@
-import { Card } from "../base/Card";
-import { ICardCatalogData, categoryMap, CategoryKey } from "../../types";
+import { Card } from "./Card";
+import { IProduct } from "../../types";
+import { categoryMap } from "../../utils/constants";
 import { ensureElement } from "../../utils/utils";
 
-export interface ICardCatalogActions {
-  onClick: (id: string) => void;
+export type TCardCatalog = Pick<IProduct, 'category'> & {
+    image: {
+        src: string;
+        alt?: string;
+    };
 }
 
-export class CardCatalog extends Card<ICardCatalogData> {
-  protected imageElement: HTMLImageElement;
-  protected categoryElement: HTMLElement;
+    interface ICardCatalogActions {
+        onClick: (event: MouseEvent) => void;
+    }
 
-  constructor(container: HTMLElement, actions?: ICardCatalogActions) {
-    super(container);
+    export class CardCatalog extends Card<TCardCatalog> {
+        protected imageElement: HTMLImageElement;
+        protected categoryElement: HTMLElement;
 
-    this.categoryElement = ensureElement<HTMLElement>(
-      ".card__category",
-      this.container,
-    );
-    this.imageElement = ensureElement<HTMLImageElement>(
-      ".card__image",
-      this.container,
-    );
+        constructor(container: HTMLElement, actions?: ICardCatalogActions) {
+            super(container);
 
-    if (actions?.onClick) {
-      this.container.addEventListener("click", () => {
-        const id = this.container.dataset.id;
-        if (id) {
-          actions.onClick(id);
+            this.imageElement = ensureElement<HTMLImageElement>('.card__image', container);
+            this.categoryElement = ensureElement<HTMLElement>('.card__category', container);
+
+            if(actions?.onClick) {
+                container.addEventListener('click', actions.onClick);
+            }
         }
-      });
+
+        set image(value: {src: string; alt?: string}) {
+            this.setImage(this.imageElement, value.src, value.alt);
+        }
+
+        set category(value: string) {
+            this.categoryElement.textContent = value;
+            for (const key in categoryMap) {
+                this.categoryElement.classList.toggle(
+                    categoryMap[key as keyof typeof categoryMap],
+                    key === value
+                )
+            }
+        }
     }
-  }
-
-  set category(value: string) {
-    if (this.categoryElement) {
-      this.categoryElement.textContent = value;
-
-      for (const key in categoryMap) {
-        this.categoryElement.classList.remove(categoryMap[key as CategoryKey]);
-      }
-
-      const categoryKey = value as CategoryKey;
-      if (categoryMap[categoryKey]) {
-        this.categoryElement.classList.add(categoryMap[categoryKey]);
-      }
-    }
-  }
-
-  set image(value: string) {
-    if (this.imageElement) {
-      this.imageElement.src = value;
-      this.imageElement.alt = this.title;
-    }
-  }
-
-  render(data: ICardCatalogData): HTMLElement {
-    super.render(data);
-    this.container.dataset.id = data.id;
-    this.image = data.image;
-    this.category = data.category;
-    return this.container;
-  }
-}

@@ -1,34 +1,30 @@
-import { IProduct } from "../../types";
-import { EventEmitter } from "../base/Events";
+import { IProduct } from '../../types';
+import { IEvents } from '../base/Events';
 
 export class Catalog {
-  private products: IProduct[] = [];
-  private selectedProduct: IProduct | null = null;
-  private events: EventEmitter;
+    private _products: IProduct[] = [];
+    private _selectedProduct: IProduct | null = null;
 
-  constructor(events: EventEmitter) {
-    this.events = events;
-  }
+    constructor(protected events: IEvents) {}
+    setProducts(products: IProduct[]): void {
+        this._products = products;
+        this.events.emit('item:changed');
+    }
 
-  setProducts(products: IProduct[]): void {
-    this.products = products;
-    this.events.emit("catalog:changed");
-  }
+    getProducts(): IProduct[] {
+        return this._products;
+    }
 
-  getProducts(): IProduct[] {
-    return this.products;
-  }
+    getProduct(id: string): IProduct | undefined {
+        return this._products.find(product => product.id === id)
+    }
 
-  getProductById(id: string): IProduct | undefined {
-    return this.products.find((product) => product.id === id);
-  }
+    setSelectedProduct(product: IProduct):void {
+        this._selectedProduct = product;
+        this.events.emit('preview:changed');
+    }
 
-  setSelectedProduct(product: IProduct): void {
-    this.selectedProduct = product;
-    this.events.emit("product:selected", product);
-  }
-
-  getSelectedProduct(): IProduct | null {
-    return this.selectedProduct;
-  }
+    getSelectedProduct(): IProduct | null {
+        return this._selectedProduct;
+    }
 }

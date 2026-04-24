@@ -1,60 +1,55 @@
 import { Component } from "../base/Component";
-import { IEvents } from "../../types";
+import { ensureElement } from "../../utils/utils";
 
-export class Modal extends Component<object> {
-  protected modalElement: HTMLElement;
-  protected contentElement: HTMLElement;
-  protected closeButton: HTMLButtonElement;
-  protected events: IEvents;
-  private handleEscape: (event: KeyboardEvent) => void;
+interface IModalData {
+    content: HTMLElement;
+}
 
-  constructor(container: HTMLElement, events: IEvents) {
-    super(container);
-    this.events = events;
-    this.modalElement = container;
-    this.contentElement = container.querySelector(
-      ".modal__content",
-    ) as HTMLElement;
-    this.closeButton = container.querySelector(
-      ".modal__close",
-    ) as HTMLButtonElement;
+export class Modal extends Component<IModalData> {
+    protected closeButton: HTMLButtonElement;
+    protected contentElement: HTMLElement;
 
-    this.closeButton.addEventListener("click", () => this.close());
+    constructor(container: HTMLElement) {
+        super(container);
 
-    this.modalElement.addEventListener("click", (event) => {
-      if (event.target === this.modalElement) {
-        this.close();
-      }
-    });
+        this.closeButton = ensureElement<HTMLButtonElement>('.modal__close', container);
+        this.contentElement = ensureElement<HTMLElement>('.modal__content', container);
 
-    this.handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        this.close();
-      }
-    };
-  }
+        this.closeButton.addEventListener('click', this.close.bind(this));
+        this.container.addEventListener('click', (event) => {
+            if (event.target === event.currentTarget) {
+                this.close();
+            }
+        });
+        this.handleEscUp = this.handleEscUp.bind(this);
+    }
 
-  open(): void {
-    this.modalElement.classList.add("modal_active");
-    document.addEventListener("keydown", this.handleEscape);
-  }
+    set content(value: HTMLElement) {
+        if (this.contentElement) {
+            this.contentElement.innerHTML = '';
+            this.contentElement.appendChild(value);
+        }
+    }
 
-  close(): void {
-    this.modalElement.classList.remove("modal_active");
-    this.contentElement.innerHTML = "";
-    document.removeEventListener("keydown", this.handleEscape);
-  }
+    open() {
+        this.container.classList.add('modal_active');
+        document.addEventListener('keyup', this.handleEscUp);
+    }
 
-  setContent(content: HTMLElement): void {
-    this.contentElement.innerHTML = "";
-    this.contentElement.appendChild(content);
-  }
+    close() {
+        this.container.classList.remove('modal_active');
+        document.removeEventListener('keyup', this.handleEscUp);
+    }
 
-  getContent(): HTMLElement | null {
-    return this.contentElement.firstChild as HTMLElement;
-  }
+    handleEscUp(evt: KeyboardEvent) {
+        if (evt.key === 'Escape') {
+            this.close();
+        }
+    }
 
-  render(): HTMLElement {
-    return this.container;
-  }
+    render(data: IModalData): HTMLElement {
+        super.render(data);
+        this.open();
+        return this.container;
+    }
 }
