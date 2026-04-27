@@ -9,7 +9,6 @@ export class Buyer {
     address: "",
   };
   private events: EventEmitter;
-
   constructor(events: EventEmitter) {
     this.events = events;
   }
